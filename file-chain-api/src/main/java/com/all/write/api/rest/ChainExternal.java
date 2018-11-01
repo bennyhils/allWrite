@@ -9,6 +9,6 @@ public interface ChainExternal {
     ResponseEntity pingExt();
     ResponseEntity getChain();
     void receiveFileRequest(RequestingFileInfo requestingFileInfo);
-    void acceptUploadRequest(String fileHash);
+    ResponseEntity acceptUploadRequest(String fileHash);
     Boolean addBlock(Block block);
 }

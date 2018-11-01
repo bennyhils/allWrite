@@ -8,13 +8,18 @@ import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.util.LinkedList;
 
 @Controller("clientExternalController")
@@ -63,10 +68,29 @@ public class ClientExternalController implements ChainExternal {
     }
 
     @Override
-    public void acceptUploadRequest(String fileHash) {
-        //call download
+    @GetMapping("/acceptUploadRequest")
+    public ResponseEntity acceptUploadRequest(String fileHash) {
         RequestingFileInfo outgoingInfo = stateHolder.getOutgoingRequest(fileHash);
-        File file = new File(outgoingInfo.getOriginFilePath());
+
+        //call download
+        File file2Upload = new File(outgoingInfo.getOriginFilePath());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        InputStreamReader i = null;
+        try {
+            i = new InputStreamReader(new FileInputStream(file2Upload));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("The length of the file is : " + file2Upload.length());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(file2Upload.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(i);
     }
 
     @Override

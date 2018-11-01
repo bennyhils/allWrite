@@ -11,21 +11,17 @@ import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.FileOutputStream;
+import java.util.*;
 
 
 @Controller
@@ -91,7 +87,27 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
+    @GetMapping("/download")
     public void download(RequestingFileInfo fileInfo, String localFilePath) {
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        messageConverters.add(new ByteArrayHttpMessageConverter());
+
+        RestTemplate restTemplate = new RestTemplate(messageConverters);
+        String uri = "http://" + fileInfo.getSender().getAddress() + "/acceptUploadRequest";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<byte[]> response = restTemplate.exchange(uri,
+                HttpMethod.GET, entity, byte[].class, "1");
+
+        try (FileOutputStream fos = new FileOutputStream(localFilePath)) {
+            fos.write(response.getBody());
+            //fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
 
     }
 
