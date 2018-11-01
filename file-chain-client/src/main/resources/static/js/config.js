@@ -12,6 +12,9 @@ Config = {
         getOutList: "/server/getOutList.json",
         getClientsList: "/server/getClientList.json",
         acceptFile: "/server/acceptFile.json"
+        // login: "/login",
+        // getInList: "/incoming/list",
+        // getOutList: "/outgoing/list",
         // getClientsList: "/member/list",
         // acceptFile: "/download"
     },
