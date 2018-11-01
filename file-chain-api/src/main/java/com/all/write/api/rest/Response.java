@@ -1,13 +1,16 @@
 package com.all.write.api.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Response implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Response<T> implements Serializable {
     private Integer code;
     private String message;
-    private Map<String, Object> data = new HashMap<>();
+    private Map<String, T> data = new HashMap<>();
 
     public Response() {
         this.code = 0;
@@ -30,11 +33,11 @@ public class Response implements Serializable {
         this.message = message;
     }
 
-    public Map<String, Object> getData() {
+    public Map<String, T> getData() {
         return data;
     }
 
-    public void setData(Map<String, Object> data) {
+    public void setData(Map<String, T> data) {
         this.data = data;
     }
 }

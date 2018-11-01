@@ -1,9 +1,9 @@
 package com.all.write.api;
 
 import com.all.write.NetworkMember;
-import com.all.write.api.rest.Response;
+import org.springframework.http.ResponseEntity;
 
 public interface TrackerAPI {
 
-    Response memberList(NetworkMember me);
+    ResponseEntity memberList(NetworkMember me);
 }

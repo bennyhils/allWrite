@@ -2,9 +2,10 @@ package com.all.write.web;
 
 import com.all.write.NetworkMember;
 import com.all.write.api.TrackerAPI;
-import com.all.write.api.rest.Response;
 import com.all.write.service.MemberChecker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ public class TrackerController implements TrackerAPI {
     @Override
     @ResponseBody
     @RequestMapping(value = "/tracker/list", method = RequestMethod.POST)
-    public Response memberList(@RequestBody NetworkMember me) {
+    public ResponseEntity memberList(@RequestBody NetworkMember me) {
 
         //async ping
         if (!memberChecker.pingMember(me)) {
@@ -32,9 +33,9 @@ public class TrackerController implements TrackerAPI {
 
         // and sync addition
         networkMemberDao.add(me);
-        Response response = new Response();
-        response.getData().put("list", networkMemberDao.list());
-        return response;
+        return new ResponseEntity<>(
+                networkMemberDao.list().toArray(),
+                HttpStatus.OK);
     }
 
 }

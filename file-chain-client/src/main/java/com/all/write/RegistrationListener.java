@@ -1,7 +1,6 @@
 package com.all.write;
 
 import com.all.write.api.Block;
-import com.all.write.api.rest.Response;
 import com.all.write.core.ClientService;
 import com.all.write.core.DataHolder;
 import org.slf4j.Logger;
@@ -9,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,7 +42,7 @@ public class RegistrationListener {
         // w/a spring shit
         new Thread(() -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -49,8 +52,9 @@ public class RegistrationListener {
                 rt.getMessageConverters().add(new StringHttpMessageConverter());
                 String uri = "http://" + localAddress + ":8080/tracker/list";
                 NetworkMember netMember = new NetworkMember("test-key", "localhost:8090");
-                Response response = rt.postForObject(uri, netMember, Response.class);
-                List<NetworkMember> memberList = (List<NetworkMember>) response.getData().get("list");
+                ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
+                        new HttpEntity<>(netMember), NetworkMember[].class);
+                List<NetworkMember> memberList = Arrays.asList(response.getBody());
 
 
                 Map<String, NetworkMember> networkMemberMap = memberList.stream()
@@ -77,13 +81,11 @@ public class RegistrationListener {
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         String uri = "http://" + address + ":8080/chain";
-        Response response = rt.getForObject(uri, Response.class);
-        List<Block> chain = (List<Block>) response.getData();
+        ResponseEntity<Block[]> response = rt.exchange(uri,  HttpMethod.GET, null, Block[].class);
+        List<Block> chain = Arrays.asList(response.getBody());
 
-        assert chain != null && chain.size() > 0;
+        assert chain.size() > 0;
         dataHolder.setBlocks(chain);
-
-
 
     }
 
