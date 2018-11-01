@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class NetworkMemberDaoImpl implements NetworkMemberDao {
 
     @Override
     public List<NetworkMember> list() {
-        return (List<NetworkMember>) repo.values();
+        return new ArrayList<>(repo.values());
     }
 
     @Override
