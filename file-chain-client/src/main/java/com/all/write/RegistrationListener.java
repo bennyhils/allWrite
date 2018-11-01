@@ -52,22 +52,13 @@ public class RegistrationListener {
                 e.printStackTrace();
             }
             try {
-                RestTemplate rt = new RestTemplate();
-                rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                rt.getMessageConverters().add(new StringHttpMessageConverter());
-                String uri = "http://" + trackerAddress + ":8080/tracker/list";
-                ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
-                        new HttpEntity<>(networkMember), NetworkMember[].class);
-                List<NetworkMember> memberList = Arrays.asList(response.getBody());
-
-                Map<String, NetworkMember> networkMemberMap = memberList.stream()
-                        .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
+                Map<String, NetworkMember> networkMemberMap = clientService.getNetworkMembersFromTracker(trackerAddress);
                 dataHolder.setNetworkMembers(networkMemberMap);
 
-                if (memberList.size() == 1) {
+                if (networkMemberMap.size() == 1) {
                     initBlockChain();
                 } else {
-                    getBlockChain(memberList);
+                    getBlockChain(new ArrayList(networkMemberMap.values()));
                 }
             } catch (Exception e) {
                 System.out.println("err " + e);

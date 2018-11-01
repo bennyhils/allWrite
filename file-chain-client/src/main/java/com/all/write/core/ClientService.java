@@ -4,10 +4,20 @@ import com.all.write.NetworkMember;
 import com.all.write.api.Block;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ClientService {
@@ -39,5 +49,20 @@ public class ClientService {
 
     public String getBase64EncodedPublicKey() {
         return StringUtil.getBase64Encoded(publicKey);
+    }
+
+    public Map<String, NetworkMember> getNetworkMembersFromTracker(String trackerAddress) {
+        RestTemplate rt = new RestTemplate();
+        rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        rt.getMessageConverters().add(new StringHttpMessageConverter());
+        String uri = "http://" + trackerAddress + ":8080/tracker/list";
+        ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
+                new HttpEntity<>(networkMember), NetworkMember[].class);
+        List<NetworkMember> memberList = Arrays.asList(response.getBody());
+
+        Map<String, NetworkMember> networkMemberMap = memberList.stream()
+                .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
+
+        return networkMemberMap;
     }
 }

@@ -5,32 +5,27 @@ import com.all.write.api.Block;
 import com.all.write.api.LocalChainData;
 import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainExternal;
+import com.all.write.core.ClientService;
 import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.core.VerifyService;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.Map;
 
-@Controller("clientExternalController")
+@RestController("clientExternalController")
 public class ClientExternalController implements ChainExternal {
 
     @Autowired
@@ -41,6 +36,12 @@ public class ClientExternalController implements ChainExternal {
 
     @Autowired
     private VerifyService verifyService;
+
+    @Value("${tracker.address}")
+    private String trackerAddress;
+
+    @Autowired
+    private ClientService clientService;
 
     @PostConstruct
     public void init() {
@@ -54,6 +55,8 @@ public class ClientExternalController implements ChainExternal {
         return "pong";
     }
 
+    @GetMapping("/pingExt")
+    @ResponseBody
     @Override
     public ResponseEntity pingExt() {
         LocalChainData chain = new LocalChainData();
@@ -84,6 +87,7 @@ public class ClientExternalController implements ChainExternal {
     public byte[] acceptUploadRequest(String fileHash) {
         RequestingFileInfo outgoingInfo = stateHolder.getOutgoingRequest(fileHash);
 
+
         File file2Upload = new File(outgoingInfo.getOriginFilePath());
         System.out.println("The length of the file is : " + file2Upload.length());
 
@@ -94,11 +98,34 @@ public class ClientExternalController implements ChainExternal {
         }
     }
 
+    private boolean checkMember(String authorKey, Block block) throws Exception {
+        Map<String, NetworkMember> membersMap = dataHolder.getAllNetworkMembers();
+
+        if (membersMap.containsKey(authorKey)) {
+            if (!verifyService.verifyAuthorSignature(block, authorKey)) {
+                throw new Exception("VerifyAuthorSignature failed!");
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @GetMapping(value = "/requestKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Override
-    public Boolean addBlock(Block block) {
+    @ResponseBody
+    public byte[] requestKey(String fileHash) {
+        return stateHolder.getSecretKey(fileHash);
+    }
+
+    @Override
+    @PostMapping("/addBlock")
+    public Boolean addBlock(@RequestBody Block block, HttpServletRequest request) {
         if (block == null) {
             return Boolean.FALSE;
         }
+        request.getRequestURI();
 
         //FIXME: verify all fields
         if (block.getAuthorSignature() == null
@@ -108,19 +135,22 @@ public class ClientExternalController implements ChainExternal {
             return Boolean.FALSE;
         }
 
-        Map<String, NetworkMember> membersMap = dataHolder.getAllNetworkMembers();
         String authorKey = StringUtil.getAuthorPublicKey(block);
 
         if (authorKey == null) {
             return Boolean.FALSE;
         }
 
-        if (membersMap.containsKey(authorKey)) {
-            if (!verifyService.verifyAuthorSignature(block, authorKey)) {
-                return Boolean.FALSE;
+        try {
+            if (!checkMember(authorKey, block)) {
+                dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress));
+
+                if (!checkMember(authorKey, block)) {
+                    return Boolean.FALSE;
+                }
             }
-        } else {
-            //FIXME: go to tracker
+        } catch (Exception e) {
+            e.printStackTrace();
             return Boolean.FALSE;
         }
 

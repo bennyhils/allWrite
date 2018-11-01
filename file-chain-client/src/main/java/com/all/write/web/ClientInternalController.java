@@ -19,11 +19,17 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.*;
 import java.util.*;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.FileOutputStream;
 import java.security.SecureRandom;
+import java.util.*;
 
 
 @RestController
@@ -41,6 +47,9 @@ public class ClientInternalController implements ChainInternal {
     @Autowired
     private NetworkMember me;
 
+    @Autowired
+    private ClientExternalController clientExternalController;
+
     @Override
     @RequestMapping(value = "/member/list", method = RequestMethod.GET)
     @ResponseBody
@@ -51,7 +60,7 @@ public class ClientInternalController implements ChainInternal {
 
     @Override
     @PostMapping("/uploadRequest")
-    public void uploadRequest(String fileLocalPath, NetworkMember targetNetworkMember) {
+    public void uploadRequest(String fileLocalPath, @RequestBody NetworkMember targetNetworkMember) {
 
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new StringHttpMessageConverter());
@@ -76,17 +85,16 @@ public class ClientInternalController implements ChainInternal {
         rt.postForObject(uri,  fileInfo, RequestingFileInfo.class);
 
         stateHolder.addOutgoingFiles(fileInfo);
+        stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
 
-        createSendFileRequest(fileInfo, null);
+        createSendFileRequest(fileInfo);
 
     }
 
-    private void createSendFileRequest(RequestingFileInfo fileInfo, byte [] secretKeyBytes) {
+    private void createSendFileRequest(RequestingFileInfo fileInfo) {
         Block block = new Block();
         block.setType(Block.Type.SEND_FILE);
         block.setSender(me.getPublicKey());
-        stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
-        block.setSecretKey(Base64.getEncoder().encodeToString(secretKeyBytes));
         block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
         block.setFileSize(fileInfo.getFileSize());
         block.setFileName(fileInfo.getOriginFilePath());
@@ -102,35 +110,80 @@ public class ClientInternalController implements ChainInternal {
 
     @Override
     @PostMapping(value = "/download")
-    public void download(String localFilePath, RequestingFileInfo fileInfo) {
+    public void download(String localFilePath, @RequestBody RequestingFileInfo fileInfo) {
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
         messageConverters.add(new ByteArrayHttpMessageConverter());
 
         RestTemplate restTemplate = new RestTemplate(messageConverters);
-        String uri = "http://" + fileInfo.getSender().getAddress() + "/acceptUploadRequest";
+        String uri = "http://" + fileInfo.getSender().getAddress();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/octet-stream");
 
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(uri,
+        ResponseEntity<byte[]> response = restTemplate.exchange(uri + "/acceptUploadRequest",
                 HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
 
+
+
+        writeFileReceivedBlock(fileInfo);
+
+        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(uri + "/requestKey", HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
+        byte[] secretKeyBytes = responseEntity.getBody();
+        String key = new String(secretKeyBytes);
+        Key secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
+        Cipher cipher = null;
+        byte[] outputBytes;
         try (FileOutputStream fos = new FileOutputStream(localFilePath)) {
-            fos.write(response.getBody());
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            outputBytes = cipher.doFinal(Base64.getDecoder().decode(response.getBody()));
+            fos.write(outputBytes);
+        } catch (IOException| NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
         }
 
-        writeFileReceivedBlock();
 
-        //todo request secret key
+        writeFileSuccesfullyLoadedBlock();
+    }
+
+    private void writeFileSuccesfullyLoadedBlock() {
 
     }
 
-    private void writeFileReceivedBlock() {
+    private void writeFileReceivedBlock(RequestingFileInfo fileInfo) {
 
+        Block fileReceivedBlock = new Block();
+        fileReceivedBlock.setFileHash(fileInfo.getHash());
+        fileReceivedBlock.setFileName(fileInfo.getOriginFilePath());
+        fileReceivedBlock.setFileSize(fileInfo.getFileSize());
+        fileReceivedBlock.setEncFileHash(fileInfo.getEncFileHash());
+
+        fileReceivedBlock.setSecretKey("");
+        fileReceivedBlock.setSender(fileInfo.getSender().getPublicKey());
+        fileReceivedBlock.setType(Block.Type.GET_FILE);
+        fileReceivedBlock.setReceiver(me.getPublicKey());
+        fileReceivedBlock.setReceiverAddress(me.getAddress());
+        fileReceivedBlock.setSenderAddress(fileInfo.getSender().getAddress());
+
+
+        for (NetworkMember member : dataHolder.getAllNetworkMembers().values()) {
+
+            RestTemplate rt = new RestTemplate();
+            rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+            rt.getMessageConverters().add(new StringHttpMessageConverter());
+            String uri = "http://" + member.getAddress() + "/addBlock";
+
+            clientService.signBlock(fileReceivedBlock);
+
+            ResponseEntity<Boolean> response = rt.exchange(uri, HttpMethod.POST,
+                    new HttpEntity<>(fileReceivedBlock), Boolean.class);
+            Boolean memberList = response.getBody();
+
+        }
+
+        clientExternalController.addBlock(fileReceivedBlock, null);
 
     }
 
