@@ -9,20 +9,20 @@ import com.all.write.api.rest.ChainInternal;
 import com.all.write.core.ClientService;
 import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
+import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,8 +53,14 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
-    @PostMapping("/upload")
-    public void upload(String fileLocalPath, NetworkMember targetNetworkMember) {
+    @PostMapping("/uploadRequest")
+    public void uploadRequest(String fileLocalPath, NetworkMember targetNetworkMember) {
+
+        File file = new File(fileLocalPath);
+        if (!file.exists()) {
+            throw new RuntimeException("file not found");
+        }
+
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -63,6 +69,23 @@ public class ClientInternalController implements ChainInternal {
         String uri = "http://" + targetNetworkMember.getAddress() + "/receiveFileRequest";
         rt.postForObject(uri,  fileInfo, RequestingFileInfo.class);
 
+        createSendFileRequest(fileInfo);
+
+    }
+
+    private void createSendFileRequest(RequestingFileInfo fileInfo) {
+        Block block = new Block();
+        block.setType(Block.Type.SEND_FILE);
+        block.setSender(me.getPublicKey());
+
+        block.setSecretKey("");
+
+        block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
+
+        block.setFileSize(fileInfo.getFileSize());
+        block.setFileName(fileInfo.getOriginFilePath());
+        block.setFileHash(fileInfo.getHash());
+        block.setEncFileHash(fileInfo.getEncFileHash());
     }
 
     @Override

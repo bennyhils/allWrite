@@ -15,7 +15,6 @@ public class ClientService {
     private final PrivateKey privateKey;
     private final PublicKey publicKey;
 
-
     @Autowired
     private NetworkMember networkMember;
 

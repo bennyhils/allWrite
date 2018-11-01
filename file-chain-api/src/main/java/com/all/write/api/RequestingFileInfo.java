@@ -4,8 +4,6 @@ import com.all.write.NetworkMember;
 import com.all.write.util.StringUtil;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +49,7 @@ public class RequestingFileInfo {
         this.hash = hash;
     }
 
-    public String getHashOfEncrypted() {
+    public String getEncFileHash() {
         return hashOfEncrypted;
     }
 

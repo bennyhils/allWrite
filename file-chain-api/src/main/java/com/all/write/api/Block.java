@@ -22,7 +22,7 @@ public class Block {
     private Type type;
     private String fileHash;
     private String encFileHash;
-    private String privBlockHash;
+    private String prevBlockHash;
     private byte[] authorSignature;
     private String secretKey;
     private String fileName;
@@ -56,12 +56,12 @@ public class Block {
         this.encFileHash = encFileHash;
     }
 
-    public String getPrivBlockHash() {
-        return privBlockHash;
+    public String getPrevBlockHash() {
+        return prevBlockHash;
     }
 
-    public void setPrivBlockHash(String privBlockHash) {
-        this.privBlockHash = privBlockHash;
+    public void setPrevBlockHash(String prevBlockHash) {
+        this.prevBlockHash = prevBlockHash;
     }
 
     public byte[] getAuthorSignature() {
@@ -134,7 +134,7 @@ public class Block {
                 "type=" + type +
                 ", fileHash='" + fileHash + '\'' +
                 ", encFileHash='" + encFileHash + '\'' +
-                ", privBlockHash='" + privBlockHash + '\'' +
+                ", prevBlockHash='" + prevBlockHash + '\'' +
                 ", authorSignature=" + Arrays.toString(authorSignature) +
                 ", secretKey='" + secretKey + '\'' +
                 ", fileName='" + fileName + '\'' +

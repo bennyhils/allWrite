@@ -102,7 +102,7 @@ public class RegistrationListener {
         genesisBlock.setFileName("");
         genesisBlock.setFileSize(0L);
 
-        genesisBlock.setPrivBlockHash("");
+        genesisBlock.setPrevBlockHash("");
         genesisBlock.setSecretKey("");
         genesisBlock.setSender(clientService.getBase64EncodedPublicKey());
         genesisBlock.setType(Block.Type.GENESIS);

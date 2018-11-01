@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ChainInternal {
     ResponseEntity list(String filter);
-    void upload(String fileLocalPath, NetworkMember targetExternalAddress);
+    void uploadRequest(String fileLocalPath, NetworkMember targetExternalAddress);
     List<RequestingFileInfo> listRequests();
     void download(RequestingFileInfo fileInfo, String localFilePath);
     List<FileDto> getOutgoingFiles();

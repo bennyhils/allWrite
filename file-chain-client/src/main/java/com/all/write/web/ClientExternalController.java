@@ -4,10 +4,10 @@ import com.all.write.api.Block;
 import com.all.write.api.LocalChainData;
 import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainExternal;
+import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.all.write.core.DataHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,7 +20,7 @@ import java.util.LinkedList;
 public class ClientExternalController implements ChainExternal {
 
     @Autowired
-    StateHolder stateHolder;
+    private StateHolder stateHolder;
 
     @Autowired
     private DataHolder dataHolder;
@@ -40,7 +40,7 @@ public class ClientExternalController implements ChainExternal {
     @Override
     public ResponseEntity pingExt() {
         LocalChainData chain = new LocalChainData();
-        chain.setChainLength(Long.valueOf(dataHolder.getBlocks().size()));
+        chain.setChainLength((long) dataHolder.getBlocks().size());
         chain.setLastBlockHash(dataHolder.getBlocks().isEmpty() ? "" :
                 StringUtil.getHashOfBlock((Block)((LinkedList) dataHolder.getBlocks()).getLast()));
         return new ResponseEntity<>(chain,
