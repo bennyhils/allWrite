@@ -4,6 +4,7 @@ import com.all.write.NetworkMember;
 import com.all.write.api.Block;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,12 @@ public class ClientService {
 
     @Autowired
     private NetworkMember networkMember;
+
+    @Autowired
+    private DataHolder dataHolder;
+
+    @Value("${tracker.address}")
+    private String trackerAddress;
 
     public ClientService(PrivateKey privateKey, PublicKey publicKey) {
         this.privateKey = privateKey;
@@ -64,5 +71,39 @@ public class ClientService {
                 .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
 
         return networkMemberMap;
+    }
+
+    public boolean sendBlockToChain(Block block) {
+        dataHolder.setNetworkMembers(getNetworkMembersFromTracker(trackerAddress));
+        int negativeCount = 0;
+        int positiveCount = 0;
+
+        for(NetworkMember networkMember: dataHolder.getAllNetworkMembers().values()) {
+            RestTemplate rt = new RestTemplate();
+            rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+            rt.getMessageConverters().add(new StringHttpMessageConverter());
+            String pingUri = "http://" + networkMember.getAddress() + "/ping";
+
+            ResponseEntity<String> response = rt.exchange(pingUri, HttpMethod.GET,
+                    null, String.class);
+
+            if ("pong".equals(response.getBody())) {
+                RestTemplate rt1 = new RestTemplate();
+                rt1.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+                rt1.getMessageConverters().add(new StringHttpMessageConverter());
+                String addBlockUri = "http://" + networkMember.getAddress() + "/addBlock";
+
+                ResponseEntity<Boolean> addBlockResp = rt.exchange(addBlockUri, HttpMethod.POST,
+                        new HttpEntity<>(block), Boolean.class);
+
+                if (addBlockResp.getBody()) {
+                    positiveCount++;
+                }  else {
+                    negativeCount++;
+                }
+            }
+        }
+
+        return positiveCount > negativeCount;
     }
 }
