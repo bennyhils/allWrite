@@ -159,6 +159,7 @@ public class ClientInternalController implements ChainInternal {
         block.setReceiverAddress(me.getAddress());
         block.setSenderAddress(fileInfo.getSender().getAddress());
         block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
+        clientService.signBlock(block);
 
         clientService.sendBlockChainAndProcessResult(block);
     }
@@ -177,7 +178,7 @@ public class ClientInternalController implements ChainInternal {
         fileReceivedBlock.setReceiverAddress(me.getAddress());
         fileReceivedBlock.setSenderAddress(fileInfo.getSender().getAddress());
         fileReceivedBlock.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
-
+        clientService.signBlock(fileReceivedBlock);
         clientService.sendBlockChainAndProcessResult(fileReceivedBlock);
 
     }
