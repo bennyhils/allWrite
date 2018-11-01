@@ -18,8 +18,8 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
         }, 3000);
         $('#file-input').on("change", function () {
             var value = $(this).val();
-            value = value.substr(value.lastIndexOf("\\"));
-            sendRequest(Config.EndPoints.uploadRequest + "?fileLocalPath=" + value, to, function (data) {
+            value = value.substr(value.lastIndexOf("\\")+1);
+            sendRequest(Config.EndPoints.uploadRequest + "?fileLocalPath=" + value, JSON.stringify(to), function (data) {
                 updateData();
             }, undefined, undefined);
         })
@@ -332,7 +332,14 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
             }).append($('<i>', {
                 class: "fa fa-external-link"
             })).append(" Отправить файл");
-            btn.click(initFileSend);
+            (function() {
+                var item = user;
+                btn.click(function() {
+                    to = item;
+                    initFileSend();
+                });
+            })();
+
             let overlay = $('<div>', {
                 class: "overlay"
             }).append(btn);
