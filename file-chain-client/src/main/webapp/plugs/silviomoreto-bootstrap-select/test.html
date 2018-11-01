@@ -1,0 +1,37 @@
+<div class="row tabs">
+    <div class="col-sm-12">
+        <#list templates?keys as groupName>
+            <a class="template-tab-link <#if (groupName_index == 0) >active</#if>" href="#templates-group-tab-${groupName_index}" role="tab" data-toggle="tab" aria-expanded="<#if (groupName_index == 0) >true<#else>false</#if>">${groupName}</a>
+        </#list>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="tab-content">
+            <#list templates?keys as groupName>
+                <div role="tabpanel" class="tab-pane fade <#if (groupName_index == 0) >active in</#if> template-tab-pane" id="templates-group-tab-${groupName_index}">
+                    <div class="row">
+                        <#list templates[groupName] as template>
+                            <div class="col-sm-4">
+                                <div class="template-item" templateId="${template.id}">
+                                    <div class="thumb">
+                                        <img src="/templates/${template.directory}/${template.thumbnail}" alt=""/>
+                                        <a href="/templateView/?id=${template.id}" target="_blank" class="view-link"></a>
+                                    </div>
+                                    <div class="install-link" onclick="Actions.onTemplateSetup(${template.id})">
+                                        <i class="fa fa-download"></i> <span>${locales["67"]}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </#list>
+                    </div>
+                    <div class="row hid">
+                        <div class="col-sm-12 text-center">
+                            <a class="nextLink">${locales["67"]}</a>
+                        </div>
+                    </div>
+                </div>
+            </#list>
+        </div>
+    </div>
+</div>
