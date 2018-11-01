@@ -2,6 +2,7 @@ package com.all.write.core;
 
 import com.all.write.NetworkMember;
 import com.all.write.api.Block;
+import com.all.write.api.LocalChainData;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,7 +75,7 @@ public class ClientService {
         return networkMemberMap;
     }
 
-    public boolean sendBlockToChain(Block block) {
+    public int sendBlockToChain(Block block) {
         dataHolder.setNetworkMembers(getNetworkMembersFromTracker(trackerAddress));
         int negativeCount = 0;
         int positiveCount = 0;
@@ -104,6 +106,76 @@ public class ClientService {
             }
         }
 
-        return positiveCount > negativeCount;
+        if (positiveCount > negativeCount) {
+            return positiveCount;
+        } else {
+            return -1 * positiveCount;
+        }
+    }
+
+    public void processPingExt(int positiveCount) {
+        HashMap<String, NetworkMember> localChainDataMap = new HashMap<String, NetworkMember>();
+        Map<String, Integer> countMap = new HashMap<>();
+
+        for(NetworkMember networkMember: dataHolder.getAllNetworkMembers().values()) {
+            RestTemplate rt = new RestTemplate();
+            rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+            rt.getMessageConverters().add(new StringHttpMessageConverter());
+            String pingUri = "http://" + networkMember.getAddress() + "/pingExt";
+
+            ResponseEntity<LocalChainData> resp = rt.exchange(pingUri, HttpMethod.GET,
+                    null, LocalChainData.class);
+            String lastBlockHash = resp.getBody().getLastBlockHash();
+            localChainDataMap.put(lastBlockHash, networkMember);
+
+            Integer count = countMap.get(lastBlockHash);
+
+            if (count == null) {
+                count = 0;
+            }
+
+            countMap.put(lastBlockHash, Integer.valueOf(++count));
+        }
+
+        int maxCount = 0;
+        String keyOfMax = null;
+        for (String key: countMap.keySet()) {
+            Integer val = countMap.get(key);
+            if (val > maxCount) {
+                maxCount = val;
+                keyOfMax = key;
+            }
+        }
+
+        if (maxCount > (-1 * positiveCount)) {
+            NetworkMember maxMember = localChainDataMap.get(keyOfMax);
+            obtainBlockChain(maxMember);
+        }
+    }
+
+    public void sendBlockChainAndProcessResult(Block block) {
+        int positiveCount = 0;
+        if ((positiveCount = sendBlockToChain(block)) > 0) {
+            dataHolder.addBlock(block);
+        } else {
+            processPingExt(positiveCount);
+        }
+    }
+
+    public void obtainBlockChain(NetworkMember member) {
+
+        // choose true chain holder
+        String address = member.getAddress();
+
+        RestTemplate rt = new RestTemplate();
+        rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        rt.getMessageConverters().add(new StringHttpMessageConverter());
+        String uri = "http://" + address + "/chain";
+        ResponseEntity<Block[]> response = rt.exchange(uri,  HttpMethod.GET, null, Block[].class);
+        List<Block> chain = Arrays.asList(response.getBody());
+
+        assert chain.size() > 0;
+        dataHolder.setBlocks(chain);
+
     }
 }

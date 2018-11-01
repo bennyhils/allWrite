@@ -56,30 +56,13 @@ public class RegistrationListener {
                 if (networkMemberMap.size() == 1) {
                     initBlockChain();
                 } else {
-                    getBlockChain(new ArrayList(networkMemberMap.values()));
+                    clientService.processPingExt(0);
                 }
             } catch (Exception e) {
                 System.out.println("err " + e);
                 e.printStackTrace();
             }
         }).start();
-    }
-
-    private void getBlockChain(List<NetworkMember> memberArray) {
-
-        // choose true chain holder
-        String address = memberArray.get(0).getAddress();
-
-        RestTemplate rt = new RestTemplate();
-        rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-        rt.getMessageConverters().add(new StringHttpMessageConverter());
-        String uri = "http://" + address + "/chain";
-        ResponseEntity<Block[]> response = rt.exchange(uri,  HttpMethod.GET, null, Block[].class);
-        List<Block> chain = Arrays.asList(response.getBody());
-
-        assert chain.size() > 0;
-        dataHolder.setBlocks(chain);
-
     }
 
     private void initBlockChain() {
