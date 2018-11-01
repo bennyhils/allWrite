@@ -33,7 +33,6 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.LinkedList;
 import java.util.Map;
 
 @RestController("clientExternalController")
@@ -73,8 +72,7 @@ public class ClientExternalController implements ChainExternal {
     public ResponseEntity pingExt() {
         LocalChainData chain = new LocalChainData();
         chain.setChainLength((long) dataHolder.getBlocks().size());
-        chain.setLastBlockHash(dataHolder.getBlocks().isEmpty() ? "" :
-                StringUtil.getHashOfBlock((Block)((LinkedList) dataHolder.getBlocks()).getLast()));
+        chain.setLastBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
         return new ResponseEntity<>(chain,
                 HttpStatus.OK);
     }

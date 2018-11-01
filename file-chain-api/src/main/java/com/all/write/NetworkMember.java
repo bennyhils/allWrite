@@ -3,6 +3,7 @@ package com.all.write;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 public class NetworkMember implements Serializable {
@@ -41,5 +42,19 @@ public class NetworkMember implements Serializable {
                 "publicKey='" + publicKey + '\'' +
                 ", address='" + address + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NetworkMember that = (NetworkMember) o;
+        return Objects.equals(publicKey, that.publicKey) &&
+                Objects.equals(address, that.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(publicKey, address);
     }
 }

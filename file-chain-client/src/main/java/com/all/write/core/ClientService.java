@@ -26,7 +26,7 @@ public class ClientService {
     private final PublicKey publicKey;
 
     @Autowired
-    private NetworkMember networkMember;
+    private NetworkMember me;
 
     @Autowired
     private DataHolder dataHolder;
@@ -63,7 +63,7 @@ public class ClientService {
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         String uri = "http://" + trackerAddress + ":8080/tracker/list";
         ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
-                new HttpEntity<>(networkMember), NetworkMember[].class);
+                new HttpEntity<>(me), NetworkMember[].class);
         List<NetworkMember> memberList = Arrays.asList(response.getBody());
 
         Map<String, NetworkMember> networkMemberMap = memberList.stream()
@@ -115,6 +115,9 @@ public class ClientService {
         Map<String, Integer> countMap = new HashMap<>();
 
         for(NetworkMember networkMember: dataHolder.getAllNetworkMembers().values()) {
+            if (networkMember.equals(me)) {
+                continue;
+            }
             RestTemplate rt = new RestTemplate();
             rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
             rt.getMessageConverters().add(new StringHttpMessageConverter());
