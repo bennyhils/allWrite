@@ -183,13 +183,17 @@ public class ClientService {
                 }
             }
 
-//            dataHolder.setBlocks(newChain);
-            Block prevBlock = dataHolder.lastBlock();
-            for(Block myBlock: oldCopy) {
-                myBlock.setPrevBlockHash(StringUtil.getHashOfBlock(prevBlock));
-                signBlock(myBlock);
-                prevBlock = myBlock;
-                sendBlockChainAndProcessResult(myBlock, ++invokeCount);
+            if (!newChain.isEmpty()) {
+                dataHolder.setBlocks(newChain);
+                Block prevBlock = dataHolder.lastBlock();
+                for (Block myBlock : oldCopy) {
+                    myBlock.setPrevBlockHash(StringUtil.getHashOfBlock(prevBlock));
+                    signBlock(myBlock);
+                    prevBlock = myBlock;
+                    sendBlockChainAndProcessResult(myBlock, ++invokeCount);
+                }
+            } else {
+                dataHolder.addBlock(block);
             }
         }
     }
