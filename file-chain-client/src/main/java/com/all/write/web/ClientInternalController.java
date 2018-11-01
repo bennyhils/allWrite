@@ -77,7 +77,7 @@ public class ClientInternalController implements ChainInternal {
 
         stateHolder.addOutgoingFiles(fileInfo);
 
-        createSendFileRequest(fileInfo);
+        createSendFileRequest(fileInfo, null);
 
     }
 
