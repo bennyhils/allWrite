@@ -81,21 +81,6 @@ public class ClientInternalController implements ChainInternal {
 
         stateHolder.addOutgoingFiles(fileInfo);
         stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
-
-
-        createSendFileRequest(fileInfo);
-
-    }
-
-    private void createSendFileRequest(RequestingFileInfo fileInfo) {
-        Block block = new Block();
-        block.setType(Block.Type.SEND_FILE);
-        block.setSender(me.getPublicKey());
-        block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
-        block.setFileSize(fileInfo.getFileSize());
-        block.setFileName(fileInfo.getOriginFilePath());
-        block.setFileHash(fileInfo.getHash());
-        block.setEncFileHash(fileInfo.getEncFileHash());
     }
 
     @Override
