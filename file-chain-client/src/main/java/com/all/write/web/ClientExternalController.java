@@ -3,6 +3,9 @@ package com.all.write.web;
 import com.all.write.api.Block;
 import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainExternal;
+import com.all.write.core.StateHolder;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.all.write.api.rest.Response;
 import com.all.write.core.DataHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,9 @@ import javax.annotation.PostConstruct;
 
 @Controller("clientExternalController")
 public class ClientExternalController implements ChainExternal {
+
+    @Autowired
+    StateHolder stateHolder;
 
     @Autowired
     private DataHolder dataHolder;
@@ -46,9 +52,10 @@ public class ClientExternalController implements ChainExternal {
                 HttpStatus.OK);
     }
 
+    @GetMapping("receiveFileRequest")
     @Override
     public void receiveFileRequest(RequestingFileInfo requestingFileInfo) {
-
+        stateHolder.addRequestingFileInfo(requestingFileInfo);
     }
 
     @Override

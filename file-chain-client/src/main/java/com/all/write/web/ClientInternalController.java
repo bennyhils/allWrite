@@ -11,11 +11,15 @@ import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.core.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
@@ -45,8 +49,13 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
+    @GetMapping("/upload")
     public void upload(String fileLocalPath, NetworkMember targetExternalAddress) {
-        NetworkMember target = dataHolder.getAllNetworkMembers().get(targetExternalAddress.getPublicKey());
+        RestTemplate rt = new RestTemplate();
+        rt.getMessageConverters().add(new StringHttpMessageConverter());
+        rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+        RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath/*, clientService.publicKey()*/);
 
     }
 

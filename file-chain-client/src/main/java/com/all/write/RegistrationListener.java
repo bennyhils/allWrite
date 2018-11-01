@@ -37,6 +37,9 @@ public class RegistrationListener {
     @Autowired
     private ClientService clientService;
 
+    @Autowired
+    private NetworkMember networkMember;
+
     @PostConstruct
     public void init() {
         // w/a spring shit
@@ -51,7 +54,7 @@ public class RegistrationListener {
                 rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 rt.getMessageConverters().add(new StringHttpMessageConverter());
                 String uri = "http://" + localAddress + ":8080/tracker/list";
-                NetworkMember netMember = new NetworkMember("test-key", "localhost:8090");
+                NetworkMember netMember = networkMember;
                 ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
                         new HttpEntity<>(netMember), NetworkMember[].class);
                 List<NetworkMember> memberList = Arrays.asList(response.getBody());
