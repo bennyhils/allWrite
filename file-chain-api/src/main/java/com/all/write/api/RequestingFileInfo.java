@@ -4,6 +4,7 @@ public class RequestingFileInfo {
     private String originFilePath;
     private String hash;
     private String hashOfEncrypted;
+    private Long fileSize;
     private ExternalAddress sender;
 
     public String getOriginFilePath() {
