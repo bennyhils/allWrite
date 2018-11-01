@@ -4,10 +4,13 @@ import com.all.write.NetworkMember;
 import com.all.write.util.StringUtil;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Objects;
 
 @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
@@ -19,21 +22,21 @@ public class RequestingFileInfo {
     private NetworkMember sender;
 
 
-    public static RequestingFileInfo createFileInfo(String filePath, NetworkMember sender){
+    public static RequestingFileInfo createFileInfo(String filePath, NetworkMember sender, SecretKey secretKey){
         RequestingFileInfo fileInfo = new RequestingFileInfo();
         fileInfo.originFilePath = filePath;
         fileInfo.sender = sender;
         //TODO: проверка пути до файла
         Path path = Paths.get(filePath);
         try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             fileInfo.hash = StringUtil.applySha256(Files.readAllBytes(path));
-        } catch (IOException ignored) {
-
+            fileInfo.encFileHash = Base64.getEncoder()
+                    .encodeToString(cipher.doFinal(fileInfo.hash.getBytes()));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        // todo ecnrypt
-        fileInfo.encFileHash = fileInfo.hash;
-
 
         return fileInfo;
     }

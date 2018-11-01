@@ -19,7 +19,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.FileOutputStream;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +60,21 @@ public class ClientInternalController implements ChainInternal {
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-        RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath, me);
+        byte[] secretKeyBytes = null;
+        SecretKey secretKey = null;
+
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            SecureRandom random = new SecureRandom(); // cryptograph. secure random
+            keyGen.init(random);
+            secretKey = keyGen.generateKey();
+            secretKeyBytes = secretKey.getEncoded();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath, me, secretKey);
         String uri = "http://" + targetNetworkMember.getAddress() + "/receiveFileRequest";
         rt.postForObject(uri,  fileInfo, RequestingFileInfo.class);
 
@@ -67,15 +84,13 @@ public class ClientInternalController implements ChainInternal {
 
     }
 
-    private void createSendFileRequest(RequestingFileInfo fileInfo) {
+    private void createSendFileRequest(RequestingFileInfo fileInfo, byte [] secretKeyBytes) {
         Block block = new Block();
         block.setType(Block.Type.SEND_FILE);
         block.setSender(me.getPublicKey());
-
-        block.setSecretKey("");
-
+        stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
+        block.setSecretKey(Base64.getEncoder().encodeToString(secretKeyBytes));
         block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
-
         block.setFileSize(fileInfo.getFileSize());
         block.setFileName(fileInfo.getOriginFilePath());
         block.setFileHash(fileInfo.getHash());

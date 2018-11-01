@@ -12,6 +12,7 @@ import java.util.List;
 public class StateHolder {
     private List<RequestingFileInfo> requestingFileInfos = new ArrayList<>();
     private HashMap<String, RequestingFileInfo> outgoingRequest = new HashMap<>();
+    private HashMap<String, byte []> filesSecretKeys = new HashMap<String, byte []>();
 
     public List<RequestingFileInfo> getRequestingFileInfos() {
         return requestingFileInfos;
@@ -35,6 +36,14 @@ public class StateHolder {
 
     public void addOutgoingFiles(RequestingFileInfo requestingFileInfo) {
         outgoingRequest.put(requestingFileInfo.getHash(), requestingFileInfo);
+    }
+
+    public void addFileSecretKey(String fileInfoHash, byte [] secretKey) {
+        filesSecretKeys.put(fileInfoHash, secretKey);
+    }
+
+    public byte [] getSecretKey(String fileInfoHash) {
+        return filesSecretKeys.get(fileInfoHash);
     }
 
     public RequestingFileInfo getOutgoingRequest(String fileHash) {
