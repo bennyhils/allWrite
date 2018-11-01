@@ -54,6 +54,9 @@ public class ClientExternalController implements ChainExternal {
     @Autowired
     private ClientService clientService;
 
+    @Autowired
+    private NetworkMember me;
+
     @PostConstruct
     public void init() {
         System.out.println("externalController init");
@@ -114,11 +117,34 @@ public class ClientExternalController implements ChainExternal {
                 return outputBytes;
             } catch (IOException | NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
                 throw new RuntimeException(e);
+            } finally {
+                writeFileSuccesfullySentBlock(outgoingInfo);
             }
+
+
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void writeFileSuccesfullySentBlock(RequestingFileInfo fileInfo) {
+        Block block = new Block();
+        block.setFileHash(fileInfo.getHash());
+        block.setFileName(fileInfo.getOriginFilePath());
+        block.setFileSize(fileInfo.getFileSize());
+        block.setEncFileHash(fileInfo.getEncFileHash());
+
+        block.setSecretKey("");
+        block.setSender(fileInfo.getSender().getPublicKey());
+        block.setType(Block.Type.SEND_FILE);
+        block.setReceiver(me.getPublicKey());
+        block.setReceiverAddress(me.getAddress());
+        block.setSenderAddress(fileInfo.getSender().getAddress());
+        block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
+        clientService.signBlock(block);
+
+        clientService.sendBlockChainAndProcessResult(block);
     }
 
     private boolean checkMember(String authorKey, Block block) throws Exception {
