@@ -1,13 +1,12 @@
 package com.all.write.core;
 
-import com.all.write.StringUtil;
+import com.all.write.util.StringUtil;
 import com.all.write.api.Block;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
-import java.util.Base64;
 
 @Component
 public class ClientService {
