@@ -113,15 +113,12 @@ public class ClientExternalController implements ChainExternal {
                 cipher = Cipher.getInstance("AES");
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey);
                 outputBytes = cipher.doFinal(bytes);
+                writeFileSuccesfullySentBlock(outgoingInfo);
 
                 return outputBytes;
             } catch (IOException | NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
                 throw new RuntimeException(e);
-            } finally {
-                writeFileSuccesfullySentBlock(outgoingInfo);
             }
-
-
 
         } catch (IOException e) {
             throw new RuntimeException(e);
