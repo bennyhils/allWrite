@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.security.Security;
 
 /**
  * Simple {@link ServletContextListener} to test gh-2058.
@@ -29,6 +30,9 @@ public class RegistrationServletContextListener implements ServletContextListene
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
+        //add our blocks to the blockchain ArrayList:
+		//Setup Bouncey castle as a Security Provider
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		System.out.println("*** contextInitialized");
 	}

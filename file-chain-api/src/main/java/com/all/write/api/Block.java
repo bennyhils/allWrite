@@ -1,10 +1,13 @@
 package com.all.write.api;
 
+import java.security.PublicKey;
+
 public class Block {
-    enum Type {
+    public enum Type {
         SEND_FILE(0),
         GET_FILE(1),
-        SEND_KEY(3);
+        SEND_KEY(3),
+        GENESIS(4);
 
         private int value;
 
@@ -12,16 +15,16 @@ public class Block {
             this.value = value;
         }
     }
-    Type type;
-    String fileHash;
-    String encFileHash;
-    String privBlockHash;
-    String authorSignature;
-    String secretKey;
-    String fileName;
-    Long fileSize;
-    String sender;
-    String receiver;
+    private Type type;
+    private String fileHash;
+    private String encFileHash;
+    private String privBlockHash;
+    private byte[] authorSignature;
+    private String secretKey;
+    private String fileName;
+    private Long fileSize;
+    private PublicKey sender;
+    private String receiver;
 
     public Type getType() {
         return type;
@@ -55,11 +58,11 @@ public class Block {
         this.privBlockHash = privBlockHash;
     }
 
-    public String getAuthorSignature() {
+    public byte[] getAuthorSignature() {
         return authorSignature;
     }
 
-    public void setAuthorSignature(String authorSignature) {
+    public void setAuthorSignature(byte[] authorSignature) {
         this.authorSignature = authorSignature;
     }
 
@@ -87,11 +90,11 @@ public class Block {
         this.fileSize = fileSize;
     }
 
-    public String getSender() {
+    public PublicKey getSender() {
         return sender;
     }
 
-    public void setSender(String sender) {
+    public void setSender(PublicKey sender) {
         this.sender = sender;
     }
 
@@ -101,5 +104,21 @@ public class Block {
 
     public void setReceiver(String receiver) {
         this.receiver = receiver;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "type=" + type +
+                ", fileHash='" + fileHash + '\'' +
+                ", encFileHash='" + encFileHash + '\'' +
+                ", privBlockHash='" + privBlockHash + '\'' +
+                ", secretKey='" + secretKey + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", fileSize=" + fileSize +
+                ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
+                '}';
     }
 }

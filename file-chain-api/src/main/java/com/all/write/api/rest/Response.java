@@ -1,9 +1,18 @@
 package com.all.write.api.rest;
 
-public class Response {
-    Integer code;
-    String message;
-    Object data;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Response implements Serializable {
+    private Integer code;
+    private String message;
+    private Map<String, Object> data = new HashMap<>();
+
+    public Response() {
+        this.code = 0;
+        this.message = "success";
+    }
 
     public Integer getCode() {
         return code;
@@ -21,11 +30,11 @@ public class Response {
         this.message = message;
     }
 
-    public Object getData() {
+    public Map<String, Object> getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(Map<String, Object> data) {
         this.data = data;
     }
 }
