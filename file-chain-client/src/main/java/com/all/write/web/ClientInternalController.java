@@ -46,7 +46,6 @@ public class ClientInternalController implements ChainInternal {
     private NetworkMember me;
 
     @Override
-    @CrossOrigin(origins = "http://localhost:8090")
     @RequestMapping(value = "/member/list", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity list(String filter) {

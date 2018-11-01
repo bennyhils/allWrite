@@ -25,6 +25,6 @@ public class UpdateService {
         ScheduledExecutorService scheduledPool = Executors.newScheduledThreadPool(4);
         scheduledPool.scheduleWithFixedDelay(() -> {
             dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress));
-        }, 10000, 1, TimeUnit.SECONDS);
+        }, 10, 1, TimeUnit.SECONDS);
     }
 }
