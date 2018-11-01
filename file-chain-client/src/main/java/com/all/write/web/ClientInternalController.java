@@ -188,7 +188,9 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
-    public List<FileDto> getOutgoingFiles() {
+    @RequestMapping(value = "/outgoing/history", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FileDto> getOutgoingFilesHistory() {
         List<FileDto> ret = new ArrayList<>();
         List<Block> blocks = dataHolder.getBlocks();
         Map<String, Block> map = getBlocksMap(blocks);
@@ -208,10 +210,24 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
-    @RequestMapping(value = "/incoming/list", method = RequestMethod.GET)
+    @RequestMapping(value = "/outgoing/list", method = RequestMethod.GET)
     @ResponseBody
-    public List<FileDto> getIncomingFiles() {
-        // active downloads
+    public List<FileDto> getOutgoingFiles() {
+        List<FileDto> ret = new ArrayList<>();
+        Collection<RequestingFileInfo> outgoingRequests = stateHolder.getOutgoingRequests();
+
+        for(RequestingFileInfo requestingFileInfo: outgoingRequests) {
+            ret.add(convertRequestToFileDto(requestingFileInfo));
+        }
+
+        return ret;
+    }
+
+    @Override
+    @RequestMapping(value = "/incoming/history", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FileDto> getIncomingFilesHistory() {
+        // downloads history
         List<FileDto> ret = new ArrayList<>();
         List<Block> blocks = dataHolder.getBlocks();
         Map<String, Block> map = getBlocksMap(blocks);
@@ -225,7 +241,19 @@ public class ClientInternalController implements ChainInternal {
                 ret.add(fileDto);
             }
         }
-        // downloads history
+
+
+
+        return ret;
+    }
+
+    @Override
+    @RequestMapping(value = "/incoming/list", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FileDto> getIncomingFiles() {
+        // active downloads
+        List<FileDto> ret = new ArrayList<>();
+
         List<RequestingFileInfo> requestingFileInfoList = stateHolder.getRequestingFileInfos();
         for (RequestingFileInfo requestingFileInfo: requestingFileInfoList) {
             ret.add(convertRequestToFileDto(requestingFileInfo));
