@@ -111,6 +111,15 @@ public class ClientInternalController implements ChainInternal {
             throw new RuntimeException(ex);
         }
 
+        writeFileReceivedBlock();
+
+        //todo request secret key
+
+    }
+
+    private void writeFileReceivedBlock() {
+
+
     }
 
     @Override
