@@ -2,6 +2,8 @@ package com.all.write.util;
 
 import com.all.write.api.Block;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.security.*;
 import java.util.Base64;
 
@@ -30,13 +32,13 @@ public class StringUtil {
 	}
 	
 	//Applies ECDSA Signature and returns the result ( as bytes ).
-	public static byte[] applyECDSASig(PrivateKey privateKey, String input) {
+	public static byte[] applyECDSASig(PrivateKey privateKey, byte [] input) {
 		Signature dsa;
 		byte[] output = new byte[0];
 		try {
 			dsa = Signature.getInstance("ECDSA", "BC");
 			dsa.initSign(privateKey);
-			byte[] strByte = input.getBytes();
+			byte[] strByte = input;
 			dsa.update(strByte);
 			byte[] realSig = dsa.sign();
 			output = realSig;
@@ -47,11 +49,11 @@ public class StringUtil {
 	}
 	
 	//Verifies a String signature 
-	public static boolean verifyECDSASig(PublicKey publicKey, String data, byte[] signature) {
+	public static boolean verifyECDSASig(PublicKey publicKey, byte[] data, byte[] signature) {
 		try {
 			Signature ecdsaVerify = Signature.getInstance("ECDSA", "BC");
 			ecdsaVerify.initVerify(publicKey);
-			ecdsaVerify.update(data.getBytes());
+			ecdsaVerify.update(data);
 			return ecdsaVerify.verify(signature);
 		}catch(Exception e) {
 			throw new RuntimeException(e);
@@ -102,6 +104,22 @@ public class StringUtil {
 			return null;
 		}
 
-		return applySha256(block.toString().getBytes());
+		return applySha256(getBlockBytes(block));
 	}
+
+	public static byte [] getBlockBytes(Block block) {
+        byte[] bytes = null;
+        ByteArrayOutputStream bos = null;
+        ObjectOutputStream oos = null;
+        try {
+            bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(block);
+            oos.flush();
+            bytes = bos.toByteArray();
+        } catch (Exception e) {
+        }
+
+        return bytes;
+    }
 }

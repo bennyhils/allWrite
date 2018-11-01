@@ -33,7 +33,7 @@ public class ClientService {
     }
 
     public void signBlock(Block block) {
-        String data = block.toString();
+        byte [] data = StringUtil.getBlockBytes(block);
         byte[] signature = StringUtil.applyECDSASig(privateKey, data);
         block.setAuthorSignature(signature);
     }
@@ -42,7 +42,7 @@ public class ClientService {
      * check if block sender is author
      */
     public boolean verifySignature(Block block, PublicKey sender) {
-        String data = block.toString();
+        byte [] data = StringUtil.getBlockBytes(block);
         return StringUtil.verifyECDSASig(sender, data, block.getAuthorSignature());
     }
 
