@@ -2,6 +2,7 @@ package com.all.write;
 
 import com.all.write.core.DataHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -14,6 +15,9 @@ import java.util.Arrays;
 @Component
 @DependsOn("clientExternalController")
 public class RegistrationListener {
+
+    @Value("${local.address}")
+    private String localAddress;
 
     @Autowired
     private DataHolder dataHolder;
@@ -31,7 +35,7 @@ public class RegistrationListener {
                 RestTemplate rt = new RestTemplate();
                 rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 rt.getMessageConverters().add(new StringHttpMessageConverter());
-                String uri = "http://localhost:8080/tracker/list";
+                String uri = "http://" + localAddress + ":8080/tracker/list";
                 NetworkMember netMember = new NetworkMember("test-key", "localhost:8090");
                 NetworkMember[] returns = rt.postForObject(uri, netMember, NetworkMember[].class);
 
