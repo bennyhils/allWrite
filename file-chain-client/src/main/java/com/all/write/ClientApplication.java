@@ -1,6 +1,7 @@
 package com.all.write;
 
 import com.all.write.core.ClientService;
+import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -39,7 +40,7 @@ public class ClientApplication {
 
     @Bean
     public NetworkMember networkMember(@Value("${address}") String address){
-        return new NetworkMember(publicKey.toString(), address);
+        return new NetworkMember(StringUtil.getBase64Encoded(publicKey), address);
     }
 
     @Bean
