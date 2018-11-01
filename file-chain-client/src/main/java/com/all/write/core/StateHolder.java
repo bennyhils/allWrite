@@ -3,10 +3,7 @@ package com.all.write.core;
 import com.all.write.api.RequestingFileInfo;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class StateHolder {
@@ -48,5 +45,9 @@ public class StateHolder {
 
     public RequestingFileInfo getOutgoingRequest(String fileHash) {
         return outgoingRequest.get(fileHash);
+    }
+
+    public Collection<RequestingFileInfo> getOutgoingRequests() {
+        return outgoingRequest.values();
     }
 }
