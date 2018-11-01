@@ -56,7 +56,7 @@ public class RegistrationListener {
                 if (networkMemberMap.size() == 1) {
                     initBlockChain();
                 } else {
-                    clientService.processPingExt(0);
+                    dataHolder.setBlocks(clientService.sendPingExtAndGetChain(0));
                 }
             } catch (Exception e) {
                 System.out.println("err " + e);

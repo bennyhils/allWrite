@@ -16,10 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -113,7 +110,7 @@ public class ClientService {
         }
     }
 
-    public void processPingExt(int positiveCount) {
+    public List<Block> sendPingExtAndGetChain(int positiveCount) {
         HashMap<String, NetworkMember> localChainDataMap = new HashMap<String, NetworkMember>();
         Map<String, Integer> countMap = new HashMap<>();
 
@@ -149,8 +146,10 @@ public class ClientService {
 
         if (maxCount > (-1 * positiveCount)) {
             NetworkMember maxMember = localChainDataMap.get(keyOfMax);
-            obtainBlockChain(maxMember);
+            return  obtainBlockChain(maxMember);
         }
+
+        return Collections.EMPTY_LIST;
     }
 
     public void sendBlockChainAndProcessResult(Block block) {
@@ -158,12 +157,12 @@ public class ClientService {
         if ((positiveCount = sendBlockToChain(block)) > 0) {
             dataHolder.addBlock(block);
         } else {
-            processPingExt(positiveCount);
+            List<Block> chain = sendPingExtAndGetChain(positiveCount);
+            dataHolder.setBlocks(chain);//FIXME: rebuild own chain
         }
     }
 
-    public void obtainBlockChain(NetworkMember member) {
-
+    public List<Block> obtainBlockChain(NetworkMember member) {
         // choose true chain holder
         String address = member.getAddress();
 
@@ -172,10 +171,6 @@ public class ClientService {
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         String uri = "http://" + address + "/chain";
         ResponseEntity<Block[]> response = rt.exchange(uri,  HttpMethod.GET, null, Block[].class);
-        List<Block> chain = Arrays.asList(response.getBody());
-
-        assert chain.size() > 0;
-        dataHolder.setBlocks(chain);
-
+        return Arrays.asList(response.getBody());
     }
 }
