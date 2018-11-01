@@ -12,4 +12,5 @@ public interface ChainExternal {
     List<Block> getChain();
     void receiveFileRequest(RequestingFileInfo requestingFileInfo);
     void ackReceiveAndDownload(String fileHash);
+    Boolean addBlock(Block block);
 }
