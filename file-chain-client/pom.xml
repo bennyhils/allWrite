@@ -58,7 +58,6 @@
             <artifactId>bcprov-jdk15</artifactId>
             <version>1.46</version>
         </dependency>
-
     </dependencies>
     <build>
         <pluginManagement>

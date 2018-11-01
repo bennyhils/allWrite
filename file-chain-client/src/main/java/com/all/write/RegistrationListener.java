@@ -30,6 +30,10 @@ public class RegistrationListener {
 
     @Value("${local.address}")
     private String localAddress;
+    @Value("${tracker.address}")
+    private String trackerAddress;
+    @Value("${server.port}")
+    private String serverPort;
 
     @Autowired
     private DataHolder dataHolder;
@@ -54,11 +58,9 @@ public class RegistrationListener {
                 rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 rt.getMessageConverters().add(new StringHttpMessageConverter());
                 String uri = "http://" + localAddress + ":8080/tracker/list";
-                NetworkMember netMember = networkMember;
                 ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
-                        new HttpEntity<>(netMember), NetworkMember[].class);
+                        new HttpEntity<>(networkMember), NetworkMember[].class);
                 List<NetworkMember> memberList = Arrays.asList(response.getBody());
-
 
                 Map<String, NetworkMember> networkMemberMap = memberList.stream()
                         .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
@@ -83,7 +85,7 @@ public class RegistrationListener {
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         rt.getMessageConverters().add(new StringHttpMessageConverter());
-        String uri = "http://" + address + ":8080/chain";
+        String uri = "http://" + address + "/chain";
         ResponseEntity<Block[]> response = rt.exchange(uri,  HttpMethod.GET, null, Block[].class);
         List<Block> chain = Arrays.asList(response.getBody());
 
@@ -93,7 +95,6 @@ public class RegistrationListener {
     }
 
     private void initBlockChain() {
-        ArrayList<Block> blocks = new ArrayList<>();
         Block genesisBlock = new Block();
 
         genesisBlock.setEncFileHash("0");
@@ -103,11 +104,13 @@ public class RegistrationListener {
 
         genesisBlock.setPrivBlockHash("");
         genesisBlock.setSecretKey("");
-        genesisBlock.setSender(clientService.publicKey());
+        genesisBlock.setSender(clientService.getBase64EncodedPublicKey());
         genesisBlock.setType(Block.Type.GENESIS);
 
         clientService.signBlock(genesisBlock);
 
+        ArrayList<Block> blocks = new ArrayList<>();
+        blocks.add(genesisBlock);
         dataHolder.setBlocks(blocks);
 
         LOGGER.info("Genesis block created");

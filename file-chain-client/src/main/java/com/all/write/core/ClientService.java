@@ -1,36 +1,27 @@
 package com.all.write.core;
 
+import com.all.write.NetworkMember;
 import com.all.write.StringUtil;
 import com.all.write.api.Block;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.security.*;
-import java.security.spec.ECGenParameterSpec;
-import java.util.Base64;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 @Component
 public class ClientService {
 
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
 
-    @PostConstruct
-    public void init() {
-        try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-            ECGenParameterSpec ecSpec = new ECGenParameterSpec("prime192v1");
-            // Initialize the key generator and generate a KeyPair
-            keyGen.initialize(ecSpec, random); //256
-            KeyPair keyPair = keyGen.generateKeyPair();
-            // Set the public and private keys from the keyPair
-            privateKey = keyPair.getPrivate();
-            publicKey = keyPair.getPublic();
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Autowired
+    private NetworkMember networkMember;
+
+    public ClientService(PrivateKey privateKey, PublicKey publicKey) {
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
     }
 
     public void signBlock(Block block) {
@@ -45,10 +36,6 @@ public class ClientService {
     public boolean verifySignature(Block block, PublicKey sender) {
         String data = block.toString();
         return StringUtil.verifyECDSASig(sender, data, block.getAuthorSignature());
-    }
-
-    public PublicKey publicKey() {
-        return publicKey;
     }
 
     public String getBase64EncodedPublicKey() {

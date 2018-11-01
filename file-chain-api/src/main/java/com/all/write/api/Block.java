@@ -1,6 +1,5 @@
 package com.all.write.api;
 
-import java.security.PublicKey;
 import java.util.Arrays;
 
 public class Block {
@@ -28,9 +27,9 @@ public class Block {
     private String secretKey;
     private String fileName;
     private Long fileSize;
-    private PublicKey sender;
+    private String sender;
     private String senderAddress;
-    private PublicKey receiver;
+    private String receiver;
     private String receiverAddress;
 
     public Type getType() {
@@ -97,11 +96,11 @@ public class Block {
         this.fileSize = fileSize;
     }
 
-    public PublicKey getSender() {
+    public String getSender() {
         return sender;
     }
 
-    public void setSender(PublicKey sender) {
+    public void setSender(String sender) {
         this.sender = sender;
     }
 
@@ -113,11 +112,11 @@ public class Block {
         this.senderAddress = senderAddress;
     }
 
-    public PublicKey getReceiver() {
+    public String getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(PublicKey receiver) {
+    public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
 

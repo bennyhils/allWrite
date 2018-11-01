@@ -27,7 +27,7 @@ public class NetworkMember implements Serializable {
         return address;
     }
 
-    public void setPublicKey(String publicKey) {
+    public void setString(String publicKey) {
         this.publicKey = publicKey;
     }
 
