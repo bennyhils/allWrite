@@ -19,11 +19,11 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.*;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.FileOutputStream;
 import java.security.SecureRandom;
-import java.util.*;
 
 
 @RestController
@@ -146,7 +146,7 @@ public class ClientInternalController implements ChainInternal {
             Block block = entry.getValue();
 
             if (entry.getKey().startsWith(selfPublicKey)) {
-                FileDto fileDto = genFileDto(block, selfPublicKey);
+                FileDto fileDto = genFileDto(block);
                 ret.add(fileDto);
             }
         }
@@ -155,7 +155,10 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
+    @RequestMapping(value = "/incoming/list", method = RequestMethod.GET)
+    @ResponseBody
     public List<FileDto> getIncomingFiles() {
+        // active downloads
         List<FileDto> ret = new ArrayList<>();
         List<Block> blocks = dataHolder.getBlocks();
         Map<String, Block> map = getBlocksMap(blocks);
@@ -165,17 +168,35 @@ public class ClientInternalController implements ChainInternal {
             Block block = entry.getValue();
 
             if (!entry.getKey().startsWith(selfPublicKey)) {
-                FileDto fileDto = genFileDto(block, selfPublicKey);
+                FileDto fileDto = genFileDto(block);
                 ret.add(fileDto);
             }
+        }
+        // downloads history
+        List<RequestingFileInfo> requestingFileInfoList = stateHolder.getRequestingFileInfos();
+        for (RequestingFileInfo requestingFileInfo: requestingFileInfoList) {
+            ret.add(convertRequestToFileDto(requestingFileInfo));
         }
 
         return ret;
     }
 
-    private FileDto genFileDto(Block block, String selfPublicKey) {
+    private FileDto convertRequestToFileDto(RequestingFileInfo requestingFileInfo) {
         FileDto fileDto = new FileDto();
-        fileDto.setId(selfPublicKey);
+        fileDto.setSize(requestingFileInfo.getFileSize());
+        fileDto.setSender(requestingFileInfo.getSender());
+        fileDto.setReceiver(me);
+        fileDto.setId(requestingFileInfo.getHash());
+        fileDto.setFileStatus(FileStatus.TRANSFER);
+        fileDto.setProgress(0.);
+        //todo to nayob or not to nayob, vot v chem vopros
+        fileDto.setSpeed(new Random().nextLong() % (requestingFileInfo.getFileSize() / 10));
+        return fileDto;
+    }
+
+    private FileDto genFileDto(Block block) {
+        FileDto fileDto = new FileDto();
+        fileDto.setId(block.getFileHash());
         fileDto.setName(block.getFileName());
 
         switch (block.getType()) {
