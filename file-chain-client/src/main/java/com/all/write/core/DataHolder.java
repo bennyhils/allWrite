@@ -5,21 +5,23 @@ import com.all.write.NetworkMember;
 import com.all.write.api.Block;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class DataHolder {
-    private List<NetworkMember> networkMembers = new ArrayList<NetworkMember>();
+    private Map<String, NetworkMember> networkMembers = new LinkedHashMap<>();
     private List<Block> blocks = new LinkedList<Block>();
 
-    public List<NetworkMember> getAllNetworkMembers() {
+    public Map<String, NetworkMember> getAllNetworkMembers() {
         return networkMembers;
     }
 
-    public void setNetworkMembers(List<NetworkMember> networkMembers) {
+    public void setNetworkMembers(Map<String, NetworkMember> networkMembers) {
         this.networkMembers = networkMembers;
+    }
+
+    public void addBlock(Block block) {
+        blocks.add(block);
     }
 
     public List<Block> getBlocks() {

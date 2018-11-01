@@ -15,8 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @DependsOn("clientExternalController")
@@ -53,6 +54,9 @@ public class RegistrationListener {
                 assert memberList != null;
                 dataHolder.setNetworkMembers(memberList);
 
+                assert returns != null;
+                Map<String, NetworkMember> networkMemberMap = Arrays.stream(returns).collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
+                dataHolder.setNetworkMembers(networkMemberMap);
 
                 if (memberList.size() == 1) {
                     initBlockChain();
