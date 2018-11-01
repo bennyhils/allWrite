@@ -24,7 +24,9 @@ public class UpdateService {
         //todo create true update
         ScheduledExecutorService scheduledPool = Executors.newScheduledThreadPool(4);
         scheduledPool.scheduleWithFixedDelay(() -> {
-            dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress));
+            if (!dataHolder.getBlocks().isEmpty()) {
+                dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress));
+            }
         }, 10, 1, TimeUnit.SECONDS);
     }
 }
