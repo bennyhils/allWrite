@@ -7,13 +7,22 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
     var clientList = [];
     var inList = [];
     var outList = [];
-
+    window.to = {
+        address: "",
+        publicKey: ""
+    };
     function init() {
         updateData();
         setInterval(function () {
             updateData();
         }, 3000);
-
+        $('#file-input').on("change", function () {
+            var value = $(this).val();
+            value = value.substr(value.lastIndexOf("\\"));
+            sendRequest(Config.EndPoints.uploadRequest + "?fileLocalPath=" + value, to, function (data) {
+                updateData();
+            }, undefined, undefined);
+        })
     }
     function updateData() {
         sendRequest(Config.EndPoints.getInList, {}, function (data) {
