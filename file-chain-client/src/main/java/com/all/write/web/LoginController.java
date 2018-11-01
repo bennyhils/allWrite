@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class LoginController {
 
-    @GetMapping("/login")
+    @GetMapping("/auth")
     @ResponseBody
     public boolean login(String key) {
         return true;

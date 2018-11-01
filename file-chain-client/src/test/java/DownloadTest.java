@@ -18,12 +18,13 @@ public class DownloadTest {
     @Test
     public void exchangeTest() {
         NetworkMember sender = new NetworkMember("todo-key", "localhost:8090");
-        createUploadRequest(sender);
+        NetworkMember recipient = new NetworkMember("todo-key2", "localhost:8091");
+        createUploadRequest(recipient);
 
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         rt.getMessageConverters().add(new StringHttpMessageConverter());
-        String uri = "http://localhost:8090/download?localFilePath=/tmp/" + UUID.randomUUID().toString() + ".txt";
+        String uri = "http://localhost:8091/download?localFilePath=/tmp/" + UUID.randomUUID().toString() + ".txt";
 
         byte[] secretKeyBytes = null;
         SecretKey secretKey = null;
@@ -47,13 +48,13 @@ public class DownloadTest {
         assert true;
     }
 
-    private static void createUploadRequest(NetworkMember sender) {
+    private static void createUploadRequest(NetworkMember recipient) {
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         String uri = "http://localhost:8090/uploadRequest?fileLocalPath=/home/roman/1.txt";
 
         ResponseEntity response = rt.exchange(uri, HttpMethod.POST,
-                new HttpEntity<>(sender), Object.class);
+                new HttpEntity<>(recipient), Object.class);
     }
 }
