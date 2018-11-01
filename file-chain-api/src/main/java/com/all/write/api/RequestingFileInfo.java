@@ -30,6 +30,14 @@ public class RequestingFileInfo {
         this.hashOfEncrypted = hashOfEncrypted;
     }
 
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
+    }
+
     public ExternalAddress getSender() {
         return sender;
     }
