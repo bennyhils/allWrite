@@ -1,5 +1,7 @@
 package com.all.write.core;
 
+import com.all.write.api.Block;
+
 import java.security.PublicKey;
 import java.util.Base64;
 
@@ -10,5 +12,9 @@ public class Utils {
         }
 
         return null;
+    }
+    //@FIXME: to do
+    public static String getHashOfBlock(Block block) {
+        return "DEADBEAF";
     }
 }
