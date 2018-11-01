@@ -123,6 +123,8 @@ public class ClientService {
             rt.getMessageConverters().add(new StringHttpMessageConverter());
             String pingUri = "http://" + networkMember.getAddress() + "/pingExt";
 
+            System.out.println(networkMember.getAddress() + " - address ping");
+
             ResponseEntity<LocalChainData> resp = rt.exchange(pingUri, HttpMethod.GET,
                     null, LocalChainData.class);
             String lastBlockHash = resp.getBody().getLastBlockHash();

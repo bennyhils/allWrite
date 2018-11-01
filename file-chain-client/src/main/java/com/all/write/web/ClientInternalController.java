@@ -249,7 +249,7 @@ public class ClientInternalController implements ChainInternal {
         fileDto.setFileStatus(FileStatus.TRANSFER);
         fileDto.setProgress(0.);
         //todo to nayob or not to nayob, vot v chem vopros
-        fileDto.setSpeed(new Random().nextLong() % (requestingFileInfo.getFileSize() / 10));
+//        fileDto.setSpeed(new Random().nextLong() % (requestingFileInfo.getFileSize() / 10));
         return fileDto;
     }
 

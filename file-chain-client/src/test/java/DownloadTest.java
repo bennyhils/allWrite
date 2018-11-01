@@ -17,14 +17,14 @@ public class DownloadTest {
 
     @Test
     public void exchangeTest() {
-        NetworkMember sender = new NetworkMember("todo-key", "localhost:8090");
-        NetworkMember recipient = new NetworkMember("todo-key2", "localhost:8091");
+        NetworkMember sender = new NetworkMember("todo-key", "10.0.0.102:8091");
+        NetworkMember recipient = new NetworkMember("todo-key2", "10.0.0.103:8090");
         createUploadRequest(recipient);
 
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         rt.getMessageConverters().add(new StringHttpMessageConverter());
-        String uri = "http://localhost:8091/download?localFilePath=/tmp/" + UUID.randomUUID().toString() + ".txt";
+        String uri = "http://10.0.0.103:8090/download?localFilePath=C:/tmp/" + UUID.randomUUID().toString() + ".txt";
 
         byte[] secretKeyBytes = null;
         SecretKey secretKey = null;
@@ -52,7 +52,7 @@ public class DownloadTest {
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         rt.getMessageConverters().add(new StringHttpMessageConverter());
-        String uri = "http://localhost:8090/uploadRequest?fileLocalPath=/home/roman/1.txt";
+        String uri = "http://10.0.0.102:8091/uploadRequest?fileLocalPath=/home/roman/1.txt";
 
         ResponseEntity response = rt.exchange(uri, HttpMethod.POST,
                 new HttpEntity<>(recipient), Object.class);
