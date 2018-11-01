@@ -1,6 +1,6 @@
 package com.all.write.api;
 
-public class FileInfo {
+public class RequestingFileInfo {
     String originFilePath;
     String hash;
     String hashOfEncrypted;

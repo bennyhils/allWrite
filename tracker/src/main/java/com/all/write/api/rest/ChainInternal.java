@@ -1,13 +1,15 @@
 package com.all.write.api.rest;
 
 import com.all.write.api.ExternalAddress;
-import com.all.write.api.FileInfo;
-
+import com.all.write.api.FileDto;
+import com.all.write.api.RequestingFileInfo;
 import java.util.List;
 
 public interface ChainInternal {
     List<ExternalAddress> list(String filter);
     void upload(String fileLocalPath, ExternalAddress targetExternalAddress);
-    List<FileInfo> listRequests();
-    void download(FileInfo fileInfo, String localFilePath);
+    List<RequestingFileInfo> listRequests();
+    void download(RequestingFileInfo fileInfo, String localFilePath);
+    List<FileDto> getOutgoingFiles();
+    List<FileDto> getIncomingFiles();
 }
