@@ -156,16 +156,7 @@ public class ClientExternalController implements ChainExternal {
 
     private boolean verifyAuthorSignature(Block block, String authorKey) {
         byte [] blockHash = StringUtil.getBlockBytes(block);
-        byte [] keyBytes = Base64.getDecoder().decode(authorKey);
-
-        PublicKey publicKey = null;
-
-        try {
-            publicKey =
-                    KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        PublicKey publicKey = StringUtil.getPublicKeyFromString(authorKey);
 
         if (publicKey == null) {
             return Boolean.FALSE;

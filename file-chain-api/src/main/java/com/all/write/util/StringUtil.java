@@ -5,6 +5,7 @@ import com.all.write.api.Block;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class StringUtil {
@@ -85,11 +86,25 @@ public class StringUtil {
 
 	public static String getBase64Encoded(PublicKey publicKey) {
 		if (publicKey != null) {
-			return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+			return getStringFromKey(publicKey);
 		}
 
 		return null;
 	}
+
+	public static PublicKey getPublicKeyFromString(String publicKeyString) {
+        byte [] keyBytes = Base64.getDecoder().decode(publicKeyString);
+        PublicKey publicKey = null;
+
+        try {
+            publicKey =
+                    KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return publicKey;
+    }
 
 	public static String getHashOfBlock(Block block) {
 		if (block == null) {
