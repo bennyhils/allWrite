@@ -7,7 +7,7 @@ import com.all.write.api.RequestingFileInfo;
 import java.util.List;
 
 public interface ChainExternal {
-    void ping();
+    String ping();
     LocalChainData pingExt();
     List<Block> getChain();
     void receiveFileRequest(RequestingFileInfo requestingFileInfo);
