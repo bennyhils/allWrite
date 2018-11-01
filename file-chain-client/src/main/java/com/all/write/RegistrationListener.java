@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 public class RegistrationListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistrationListener.class);
 
-    @Value("${local.address}")
-    private String localAddress;
     @Value("${tracker.address}")
     private String trackerAddress;
     @Value("${server.port}")
@@ -57,7 +55,7 @@ public class RegistrationListener {
                 RestTemplate rt = new RestTemplate();
                 rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 rt.getMessageConverters().add(new StringHttpMessageConverter());
-                String uri = "http://" + localAddress + ":8080/tracker/list";
+                String uri = "http://" + trackerAddress + ":8080/tracker/list";
                 ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
                         new HttpEntity<>(networkMember), NetworkMember[].class);
                 List<NetworkMember> memberList = Arrays.asList(response.getBody());
