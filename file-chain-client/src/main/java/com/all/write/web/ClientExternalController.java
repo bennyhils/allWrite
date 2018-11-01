@@ -7,6 +7,7 @@ import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainExternal;
 import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
+import com.all.write.core.VerifyService;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,9 @@ public class ClientExternalController implements ChainExternal {
 
     @Autowired
     private DataHolder dataHolder;
+
+    @Autowired
+    private VerifyService verifyService;
 
     @PostConstruct
     public void init() {
@@ -112,7 +116,7 @@ public class ClientExternalController implements ChainExternal {
         }
 
         if (membersMap.containsKey(authorKey)) {
-            if (!verifyAuthorSignature(block, authorKey)) {
+            if (!verifyService.verifyAuthorSignature(block, authorKey)) {
                 return Boolean.FALSE;
             }
         } else {
@@ -131,20 +135,9 @@ public class ClientExternalController implements ChainExternal {
                     return Boolean.FALSE;
                 }
 
-                try {
-                    Key secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
-                    Cipher cipher = Cipher.getInstance("AES");
-                    cipher.init(Cipher.DECRYPT_MODE, secretKey);
-                    byte[] outputBytes = cipher.doFinal(Base64.getDecoder().decode(block.getEncFileHash()));
-
-                    if (!Base64.getEncoder().encode(outputBytes).equals(block.getFileHash())) {
-                        return Boolean.FALSE;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (!verifyService.verifyEncrypted(block.getFileHash(), block.getEncFileHash(), key)) {
                     return Boolean.FALSE;
                 }
-
             }
 
             dataHolder.getBlocks().add(block);
@@ -154,20 +147,5 @@ public class ClientExternalController implements ChainExternal {
         return Boolean.FALSE;
     }
 
-    private boolean verifyAuthorSignature(Block block, String authorKey) {
-        byte [] blockHash = StringUtil.getBlockBytes(block);
-        PublicKey publicKey = StringUtil.getPublicKeyFromString(authorKey);
 
-        if (publicKey == null) {
-            return Boolean.FALSE;
-        }
-
-        try {
-            StringUtil.verifyECDSASig(publicKey, blockHash, block.getAuthorSignature());
-        } catch (Exception e) {
-            return Boolean.FALSE;
-        }
-
-        return Boolean.TRUE;
-    }
 }
