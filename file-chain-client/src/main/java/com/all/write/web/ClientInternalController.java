@@ -11,7 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.ArrayList;
 import java.util.List;
+
 @Controller
 public class ClientInternalController implements ChainInternal {
 
@@ -24,11 +26,12 @@ public class ClientInternalController implements ChainInternal {
     @Override
     @RequestMapping(value = "/member/list", method = RequestMethod.GET)
     public List<NetworkMember> list(String filter) {
-        return dataHolder.getAllNetworkMembers();
+        return  new ArrayList<>(dataHolder.getAllNetworkMembers().values());
     }
 
     @Override
     public void upload(String fileLocalPath, NetworkMember targetExternalAddress) {
+        NetworkMember target = dataHolder.getAllNetworkMembers().get(targetExternalAddress.getPublicKey());
 
     }
 

@@ -11,6 +11,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @DependsOn("clientExternalController")
@@ -40,7 +42,8 @@ public class RegistrationListener {
                 NetworkMember[] returns = rt.postForObject(uri, netMember, NetworkMember[].class);
 
                 assert returns != null;
-                dataHolder.setNetworkMembers(Arrays.asList(returns));
+                Map<String, NetworkMember> networkMemberMap = Arrays.stream(returns).collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
+                dataHolder.setNetworkMembers(networkMemberMap);
             } catch (Exception e) {
                 System.out.println("err " + e);
             }
