@@ -13,24 +13,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.Map;
 
-@Controller("clientExternalController")
+@RestController("clientExternalController")
 public class ClientExternalController implements ChainExternal {
 
     @Autowired
@@ -95,10 +88,12 @@ public class ClientExternalController implements ChainExternal {
     }
 
     @Override
-    public Boolean addBlock(Block block) {
+    @PostMapping("/addBlock")
+    public Boolean addBlock(@RequestBody Block block, HttpServletRequest request) {
         if (block == null) {
             return Boolean.FALSE;
         }
+        request.getRequestURI();
 
         //FIXME: verify all fields
         if (block.getAuthorSignature() == null
