@@ -12,5 +12,7 @@ public interface ChainExternal {
     ResponseEntity getChain();
     void receiveFileRequest(RequestingFileInfo requestingFileInfo);
     byte[] acceptUploadRequest(String fileHash);
+    byte[] requestKey(String fileHash);
+
     Boolean addBlock(Block block, HttpServletRequest request);
 }

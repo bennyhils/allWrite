@@ -19,6 +19,12 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.*;
+import java.util.*;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.FileOutputStream;
@@ -79,17 +85,16 @@ public class ClientInternalController implements ChainInternal {
         rt.postForObject(uri,  fileInfo, RequestingFileInfo.class);
 
         stateHolder.addOutgoingFiles(fileInfo);
+        stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
 
-        createSendFileRequest(fileInfo, null);
+        createSendFileRequest(fileInfo);
 
     }
 
-    private void createSendFileRequest(RequestingFileInfo fileInfo, byte [] secretKeyBytes) {
+    private void createSendFileRequest(RequestingFileInfo fileInfo) {
         Block block = new Block();
         block.setType(Block.Type.SEND_FILE);
         block.setSender(me.getPublicKey());
-        stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
-        block.setSecretKey(Base64.getEncoder().encodeToString(secretKeyBytes));
         block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
         block.setFileSize(fileInfo.getFileSize());
         block.setFileName(fileInfo.getOriginFilePath());
@@ -110,25 +115,40 @@ public class ClientInternalController implements ChainInternal {
         messageConverters.add(new ByteArrayHttpMessageConverter());
 
         RestTemplate restTemplate = new RestTemplate(messageConverters);
-        String uri = "http://" + fileInfo.getSender().getAddress() + "/acceptUploadRequest";
+        String uri = "http://" + fileInfo.getSender().getAddress();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/octet-stream");
 
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(uri,
+        ResponseEntity<byte[]> response = restTemplate.exchange(uri + "/acceptUploadRequest",
                 HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
 
-        try (FileOutputStream fos = new FileOutputStream(localFilePath)) {
-            fos.write(response.getBody());
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+
 
         writeFileReceivedBlock(fileInfo);
 
-        //todo request secret key
+        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(uri + "/requestKey", HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
+        byte[] secretKeyBytes = responseEntity.getBody();
+        String key = new String(secretKeyBytes);
+        Key secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
+        Cipher cipher = null;
+        byte[] outputBytes;
+        try (FileOutputStream fos = new FileOutputStream(localFilePath)) {
+            cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            outputBytes = cipher.doFinal(Base64.getDecoder().decode(response.getBody()));
+            fos.write(outputBytes);
+        } catch (IOException| NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        writeFileSuccesfullyLoadedBlock();
+    }
+
+    private void writeFileSuccesfullyLoadedBlock() {
 
     }
 

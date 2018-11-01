@@ -77,6 +77,7 @@ public class ClientExternalController implements ChainExternal {
     public byte[] acceptUploadRequest(String fileHash) {
         RequestingFileInfo outgoingInfo = stateHolder.getOutgoingRequest(fileHash);
 
+
         File file2Upload = new File(outgoingInfo.getOriginFilePath());
         System.out.println("The length of the file is : " + file2Upload.length());
 
@@ -85,6 +86,13 @@ public class ClientExternalController implements ChainExternal {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping(value = "/requestKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Override
+    @ResponseBody
+    public byte[] requestKey(String fileHash) {
+        return stateHolder.getSecretKey(fileHash);
     }
 
     @Override
