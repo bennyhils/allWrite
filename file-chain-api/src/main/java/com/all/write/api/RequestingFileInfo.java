@@ -1,10 +1,10 @@
 package com.all.write.api;
 
 public class RequestingFileInfo {
-    String originFilePath;
-    String hash;
-    String hashOfEncrypted;
-    ExternalAddress sender;
+    private String originFilePath;
+    private String hash;
+    private String hashOfEncrypted;
+    private ExternalAddress sender;
 
     public String getOriginFilePath() {
         return originFilePath;
