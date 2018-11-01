@@ -153,12 +153,39 @@ public class ClientService {
     }
 
     public void sendBlockChainAndProcessResult(Block block) {
+        sendBlockChainAndProcessResult(block, 0);
+    }
+
+    public void sendBlockChainAndProcessResult(Block block, int invokeCount) {
+        if (invokeCount > 5) {
+            return;
+        }
+
         int positiveCount = 0;
         if ((positiveCount = sendBlockToChain(block)) > 0) {
             dataHolder.addBlock(block);
         } else {
-            List<Block> chain = sendPingExtAndGetChain(positiveCount);
-            dataHolder.setBlocks(chain);//FIXME: rebuild own chain
+            List<Block> newChain = sendPingExtAndGetChain(positiveCount);
+            List<Block> oldChain = dataHolder.getBlocks();
+            List<Block> oldCopy = new ArrayList<>(oldChain);
+            oldCopy.add(block);
+
+            for (Block newBlock: newChain) {
+                for (Block oldBlock: oldChain) {
+                    if (StringUtil.getHashOfBlock(newBlock).equals(StringUtil.getHashOfBlock(oldBlock))) {
+                        oldCopy.remove(oldBlock);
+                    }
+                }
+            }
+
+            dataHolder.setBlocks(newChain);
+            Block prevBlock = dataHolder.lastBlock();
+            for(Block myBlock: oldCopy) {
+                myBlock.setPrevBlockHash(StringUtil.getHashOfBlock(prevBlock));
+                signBlock(myBlock);
+                prevBlock = myBlock;
+                sendBlockChainAndProcessResult(myBlock, ++invokeCount);
+            }
         }
     }
 
