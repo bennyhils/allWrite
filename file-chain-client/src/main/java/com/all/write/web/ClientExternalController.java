@@ -8,10 +8,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
-@Controller
+@Controller("clientExternalController")
 public class ClientExternalController implements ChainExternal {
+
+    @PostConstruct
+    public void init() {
+        System.out.println("externalController init");
+    }
 
     @GetMapping("/ping")
     @ResponseBody
