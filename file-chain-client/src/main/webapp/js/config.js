@@ -1,6 +1,6 @@
 Config = {
     versionCode: 35,
-    ServerHost: "http://localhost:8090",
+    ServerHost: "",
     AjaxRequestJSONP: "jsonp_callback",
     AjaxRequestDataType: "json",
     AjaxRequestCrossDomain: true,
@@ -10,8 +10,10 @@ Config = {
         login: "/server/login.json",
         getInList: "/server/getInList.json",
         getOutList: "/server/getOutList.json",
-        getClientsList: "/server/getClientList.json"
+        getClientsList: "/server/getClientList.json",
+        acceptFile: "/server/acceptFile.json"
         // getClientsList: "/member/list"
+        // acceptFile: "/download"
     },
 
 

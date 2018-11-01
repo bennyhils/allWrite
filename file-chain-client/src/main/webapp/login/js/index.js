@@ -1,6 +1,9 @@
 $("#login-button").click(function (event) {
     event.preventDefault();
     var key = $('[name="key"]').val();
+    if (!key) {
+        return;
+    }
     $('form').fadeOut(500);
     $('.wrapper').addClass('form-success');
     sendRequest(Config.EndPoints.login, {
