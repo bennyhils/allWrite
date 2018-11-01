@@ -1,11 +1,13 @@
 package com.all.write.api;
 
+import com.all.write.NetworkMember;
+
 public class RequestingFileInfo {
     private String originFilePath;
     private String hash;
     private String hashOfEncrypted;
     private Long fileSize;
-    private ExternalAddress sender;
+    private NetworkMember sender;
 
     public String getOriginFilePath() {
         return originFilePath;
@@ -39,11 +41,11 @@ public class RequestingFileInfo {
         this.fileSize = fileSize;
     }
 
-    public ExternalAddress getSender() {
+    public NetworkMember getSender() {
         return sender;
     }
 
-    public void setSender(ExternalAddress sender) {
+    public void setSender(NetworkMember sender) {
         this.sender = sender;
     }
 }

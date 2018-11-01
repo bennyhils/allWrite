@@ -1,13 +1,15 @@
 package com.all.write.api;
 
+import com.all.write.NetworkMember;
+
 public class FileDto {
     private String id;
     private String name;
     private Long size;
     private Double progress;
     private Long speed;
-    private ExternalAddress sender;
-    private ExternalAddress receiver;
+    private NetworkMember sender;
+    private NetworkMember receiver;
     private FileStatus fileStatus;
 
     public String getId() {
@@ -50,19 +52,19 @@ public class FileDto {
         this.speed = speed;
     }
 
-    public ExternalAddress getSender() {
+    public NetworkMember getSender() {
         return sender;
     }
 
-    public void setSender(ExternalAddress sender) {
+    public void setSender(NetworkMember sender) {
         this.sender = sender;
     }
 
-    public ExternalAddress getReceiver() {
+    public NetworkMember getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(ExternalAddress receiver) {
+    public void setReceiver(NetworkMember receiver) {
         this.receiver = receiver;
     }
 

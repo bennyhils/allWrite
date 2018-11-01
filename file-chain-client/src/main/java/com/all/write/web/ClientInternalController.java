@@ -1,6 +1,6 @@
 package com.all.write.web;
 
-import com.all.write.api.ExternalAddress;
+import com.all.write.NetworkMember;
 import com.all.write.api.FileDto;
 import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainInternal;
@@ -10,12 +10,12 @@ import java.util.List;
 @Controller
 public class ClientInternalController implements ChainInternal {
     @Override
-    public List<ExternalAddress> list(String filter) {
+    public List<NetworkMember> list(String filter) {
         return null;
     }
 
     @Override
-    public void upload(String fileLocalPath, ExternalAddress targetExternalAddress) {
+    public void upload(String fileLocalPath, NetworkMember targetExternalAddress) {
 
     }
 

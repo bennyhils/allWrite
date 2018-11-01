@@ -30,13 +30,8 @@ public class NetworkMemberDaoImpl implements NetworkMemberDao {
 
     @Override
     public synchronized void add(NetworkMember networkMember) {
-        NetworkMember currentMember = repo.putIfAbsent(networkMember.getPublicKey(), networkMember);
-        if(currentMember != null) {
-            LOGGER.info("Network member already exist current {}, try add member {}",
-                    currentMember, networkMember);
-        } else {
-            LOGGER.info("Network member successfully added {}, current member count {}",
-                    networkMember, repo.size());
-        }
+        repo.put(networkMember.getPublicKey(), networkMember);
+        LOGGER.info("Network member successfully added {}, current member count {}",
+                networkMember, repo.size());
     }
 }
