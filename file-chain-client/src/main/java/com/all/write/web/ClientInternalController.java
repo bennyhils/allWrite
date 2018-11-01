@@ -167,23 +167,7 @@ public class ClientInternalController implements ChainInternal {
         fileReceivedBlock.setSenderAddress(fileInfo.getSender().getAddress());
         fileReceivedBlock.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
 
-
-        for (NetworkMember member : dataHolder.getAllNetworkMembers().values()) {
-
-            RestTemplate rt = new RestTemplate();
-            rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-            rt.getMessageConverters().add(new StringHttpMessageConverter());
-            String uri = "http://" + member.getAddress() + "/addBlock";
-
-            clientService.signBlock(fileReceivedBlock);
-
-            ResponseEntity<Boolean> response = rt.exchange(uri, HttpMethod.POST,
-                    new HttpEntity<>(fileReceivedBlock), Boolean.class);
-            Boolean memberList = response.getBody();
-
-        }
-
-        clientExternalController.addBlock(fileReceivedBlock);
+        clientService.sendBlockChainAndProcessResult(fileReceivedBlock);
 
     }
 
