@@ -187,10 +187,7 @@ public class ClientInternalController implements ChainInternal {
 
     }
 
-    @Override
-    @RequestMapping(value = "/outgoing/history", method = RequestMethod.GET)
-    @ResponseBody
-    public List<FileDto> getOutgoingFilesHistory() {
+    private List<FileDto> getOutgoingFilesHistory() {
         List<FileDto> ret = new ArrayList<>();
         List<Block> blocks = dataHolder.getBlocks();
         Map<String, Block> map = getBlocksMap(blocks);
@@ -220,13 +217,12 @@ public class ClientInternalController implements ChainInternal {
             ret.add(convertRequestToFileDto(requestingFileInfo));
         }
 
+        ret.addAll(getOutgoingFilesHistory());
+
         return ret;
     }
 
-    @Override
-    @RequestMapping(value = "/incoming/history", method = RequestMethod.GET)
-    @ResponseBody
-    public List<FileDto> getIncomingFilesHistory() {
+    private List<FileDto> getIncomingFilesHistory() {
         // downloads history
         List<FileDto> ret = new ArrayList<>();
         List<Block> blocks = dataHolder.getBlocks();
@@ -258,6 +254,8 @@ public class ClientInternalController implements ChainInternal {
         for (RequestingFileInfo requestingFileInfo: requestingFileInfoList) {
             ret.add(convertRequestToFileDto(requestingFileInfo));
         }
+
+        ret.addAll(getIncomingFilesHistory());
 
         return ret;
     }

@@ -14,6 +14,4 @@ public interface ChainInternal {
     void download(String localFilePath, RequestingFileInfo fileInfo);
     List<FileDto> getOutgoingFiles();
     List<FileDto> getIncomingFiles();
-    List<FileDto> getOutgoingFilesHistory();
-    List<FileDto> getIncomingFilesHistory();
 }
