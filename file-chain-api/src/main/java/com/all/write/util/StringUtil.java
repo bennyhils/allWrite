@@ -122,4 +122,20 @@ public class StringUtil {
 
         return bytes;
     }
+
+    public static String getAuthorPublicKey(Block block) {
+		if (block == null) {
+			return null;
+		}
+
+		if(block.getType() == Block.Type.SEND_FILE
+				|| block.getType() == Block.Type.SEND_KEY
+				|| block.getType() == Block.Type.GENESIS) {
+				return block.getSender();
+		} else if (block.getType() == Block.Type.GET_FILE){
+			return block.getReceiver();
+		} else {
+			return null;
+		}
+	}
 }
