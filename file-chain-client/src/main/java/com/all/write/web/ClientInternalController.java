@@ -10,14 +10,16 @@ import com.all.write.core.ClientService;
 import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
@@ -51,13 +53,15 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
-    @GetMapping("/upload")
-    public void upload(String fileLocalPath, NetworkMember targetExternalAddress) {
+    @PostMapping("/upload")
+    public void upload(String fileLocalPath, NetworkMember targetNetworkMember) {
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
         RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath, me);
+        String uri = "http://" + targetNetworkMember.getAddress() + "/receiveFileRequest";
+        rt.postForObject(uri,  fileInfo, RequestingFileInfo.class);
 
     }
 
@@ -80,7 +84,7 @@ public class ClientInternalController implements ChainInternal {
 
         String selfPublicKey = clientService.getBase64EncodedPublicKey();
 
-        for (Map.Entry<String, Block> entry: map.entrySet()) {
+        for (Map.Entry<String, Block> entry : map.entrySet()) {
             Block block = entry.getValue();
 
             if (entry.getKey().startsWith(selfPublicKey)) {
@@ -90,7 +94,7 @@ public class ClientInternalController implements ChainInternal {
         }
 
         return ret;
-     }
+    }
 
     @Override
     public List<FileDto> getIncomingFiles() {
@@ -99,7 +103,7 @@ public class ClientInternalController implements ChainInternal {
         Map<String, Block> map = getBlocksMap(blocks);
         String selfPublicKey = clientService.getBase64EncodedPublicKey();
 
-        for (Map.Entry<String, Block> entry: map.entrySet()) {
+        for (Map.Entry<String, Block> entry : map.entrySet()) {
             Block block = entry.getValue();
 
             if (!entry.getKey().startsWith(selfPublicKey)) {
@@ -117,10 +121,18 @@ public class ClientInternalController implements ChainInternal {
         fileDto.setName(block.getFileName());
 
         switch (block.getType()) {
-            case SEND_KEY: fileDto.setFileStatus(FileStatus.SUCCESS); break;
-            case SEND_FILE: fileDto.setFileStatus(FileStatus.IN_PROGRESS); break;
-            case GET_FILE: fileDto.setFileStatus(FileStatus.TRANSFER); break;
-            default: fileDto.setFileStatus(FileStatus.ERROR); break;
+            case SEND_KEY:
+                fileDto.setFileStatus(FileStatus.SUCCESS);
+                break;
+            case SEND_FILE:
+                fileDto.setFileStatus(FileStatus.IN_PROGRESS);
+                break;
+            case GET_FILE:
+                fileDto.setFileStatus(FileStatus.TRANSFER);
+                break;
+            default:
+                fileDto.setFileStatus(FileStatus.ERROR);
+                break;
         }
 
         fileDto.setProgress(100.);
@@ -136,7 +148,7 @@ public class ClientInternalController implements ChainInternal {
     private Map<String, Block> getBlocksMap(List<Block> blocks) {
         Map<String, Block> map = new HashMap<>();
 
-        for(Block block: blocks) {
+        for (Block block : blocks) {
             String key = block.getSender() + block.getFileHash();
             Block savedBlock = map.get(key);
 
