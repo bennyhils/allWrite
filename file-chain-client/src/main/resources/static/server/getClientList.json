@@ -1,0 +1,30 @@
+[
+    {
+        "publicKey": "test-key",
+        "address": "10.20.33.102"
+    },
+    {
+        "publicKey": "test-key",
+        "address": "10.220.33.103"
+    },
+    {
+        "publicKey": "test-key",
+        "address": "10.50.33.102"
+    },
+    {
+        "publicKey": "test-key",
+        "address": "10.23.33.102"
+    },
+    {
+        "publicKey": "test-key",
+        "address": "10.213.33.102"
+    },
+    {
+        "publicKey": "test-key",
+        "address": "110.213.33.102"
+    },
+    {
+        "publicKey": "test-key",
+        "address": "130.213.33.102"
+    }
+]

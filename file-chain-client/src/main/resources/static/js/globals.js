@@ -163,12 +163,13 @@
 
     };
 
-    window.sendRequest = function (endpoont, params, callbackSuccess, callbackError, callbackAlways) {
+    window.sendRequest = function (endpoont, params, callbackSuccess, callbackError, callbackAlways, method) {
+        method = method || "post";
         var authKey = sessionStorage.getItem("authKey");
         $.ajax({
             url: Config.ServerHost + endpoont,
             dataType: Config.AjaxRequestDataType,
-            method: "post",
+            method: method,
             contentType: "application/json;charset=UTF-8",
             timeout: Config.AjaxRequestTimeOut,
             beforeSend: function(request) {

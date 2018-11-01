@@ -18,7 +18,7 @@ $("#login-button").click(function (event) {
         $('form').fadeIn(500);
         $('[name="key"]').val("");
         $('[name="key"]').focus();
-    });
+    }, undefined, "get");
 });
 
 $(function () {

@@ -1,0 +1,42 @@
+[
+    {
+        "id": "134",
+        "name": "image.jpg",
+        "size": 232432,
+        "status": 0,
+        "progress": 0,
+        "speed": 3422,
+        "sender": "10.22.33.232",
+        "receiver": "11.221.133.22"
+    },
+    {
+        "id": "122",
+        "name": "image121323.jpg",
+        "size": 12323424,
+        "status": 1,
+        "progress": 34.5,
+        "speed": 11112312,
+        "sender": "10.22.33.232",
+        "receiver": "11.221.133.22"
+    },
+    {
+        "id": "1441",
+        "name": "image12.jpg",
+        "size": 775676,
+        "status": 2,
+        "progress": 100,
+        "speed": 2323,
+        "sender": "10.22.33.232",
+        "receiver": "11.221.133.22"
+    },
+    {
+        "id": "35453",
+        "name": "image23231.jpg",
+        "size": 5644352,
+        "status": 3,
+        "progress": 0,
+        "speed": 100,
+        "sender": "10.22.33.232",
+        "receiver": "11.221.133.22"
+    }
+]

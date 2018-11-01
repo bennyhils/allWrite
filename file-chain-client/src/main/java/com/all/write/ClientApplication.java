@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
@@ -46,5 +49,18 @@ public class ClientApplication {
     @Bean
     public ClientService clientService() {
         return new ClientService(privateKey, publicKey);
+    }
+
+    @Bean
+    WebMvcConfigurer webMvcConfigurer() {
+        return new WebMvcConfigurerAdapter() {
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+                registry.addResourceHandler("/static/");
+                registry.addResourceHandler("classpath:/static/");
+                registry.addResourceHandler("/resources/static/");
+                registry.addResourceHandler("classpath:/resources/static/");
+            }
+        };
     }
 }

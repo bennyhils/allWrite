@@ -1,5 +1,5 @@
 if (!sessionStorage.getItem("authKey")) {
-    location = "/login";
+    location = "/login/index.html";
 }
 DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
 
@@ -19,15 +19,15 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
         sendRequest(Config.EndPoints.getInList, {}, function (data) {
             handleInList(data);
             console.log("inList updated");
-        });
+        }, undefined, undefined, "get");
         sendRequest(Config.EndPoints.getOutList, {}, function (data) {
             handleOutList(data);
             console.log("outList updated");
-        });
+        }, undefined, undefined, "get");
         sendRequest(Config.EndPoints.getClientsList, {}, function (data) {
             handleClientList(data);
             console.log("clientList updated");
-        });
+        }, undefined, undefined, "get");
     }
 
     function handleInList(list) {
@@ -47,8 +47,17 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
                 fileElem.addClass("bg-red");
             }
 
+            if (file.status == 1) {
+                fileElem.find(".info-box-icon i").hide();
+                fileElem.find(".info-box-icon").addClass("lds-hourglass");
+            } else {
+                fileElem.find(".info-box-icon i").show();
+                fileElem.find(".info-box-icon").removeClass("lds-hourglass");
+            }
+
             fileElem.find(".info-box-icon i").removeClass("fa-download").removeClass("fa-files-o")
                 .addClass(file.status == 0 ? "fa-download" : "fa-files-o");
+
 
             let text1 = fileElem.find('.info-box-text');
             let text2 = fileElem.find('.info-box-number');
@@ -95,7 +104,7 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
                 }, function () {
                     updateData();
                 })
-            })
+            });
             let content = $('<div>', {
                 class: "info-box-content"
             });
@@ -129,6 +138,13 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
             fileElem.append(icon);
             fileElem.append(content);
             fileElem.data("fileId", file.id);
+            if (file.status == 1) {
+                fileElem.find(".info-box-icon i").hide();
+                fileElem.find(".info-box-icon").addClass("lds-hourglass");
+            } else {
+                fileElem.find(".info-box-icon i").show();
+                fileElem.find(".info-box-icon").removeClass("lds-hourglass");
+            }
             return fileElem;
         }
 
