@@ -55,6 +55,8 @@ public class ClientExternalController implements ChainExternal {
         return "pong";
     }
 
+    @GetMapping("/pingExt")
+    @ResponseBody
     @Override
     public ResponseEntity pingExt() {
         LocalChainData chain = new LocalChainData();
