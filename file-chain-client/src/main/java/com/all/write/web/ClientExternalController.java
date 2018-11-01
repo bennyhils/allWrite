@@ -5,11 +5,13 @@ import com.all.write.api.Block;
 import com.all.write.api.LocalChainData;
 import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainExternal;
+import com.all.write.core.ClientService;
 import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.core.VerifyService;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,12 @@ public class ClientExternalController implements ChainExternal {
 
     @Autowired
     private VerifyService verifyService;
+
+    @Value("${tracker.address}")
+    private String trackerAddress;
+
+    @Autowired
+    private ClientService clientService;
 
     @PostConstruct
     public void init() {
@@ -88,6 +96,20 @@ public class ClientExternalController implements ChainExternal {
         }
     }
 
+    private boolean checkMember(String authorKey, Block block) throws Exception {
+        Map<String, NetworkMember> membersMap = dataHolder.getAllNetworkMembers();
+
+        if (membersMap.containsKey(authorKey)) {
+            if (!verifyService.verifyAuthorSignature(block, authorKey)) {
+                throw new Exception("VerifyAuthorSignature failed!");
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     @GetMapping(value = "/requestKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Override
     @ResponseBody
@@ -111,19 +133,22 @@ public class ClientExternalController implements ChainExternal {
             return Boolean.FALSE;
         }
 
-        Map<String, NetworkMember> membersMap = dataHolder.getAllNetworkMembers();
         String authorKey = StringUtil.getAuthorPublicKey(block);
 
         if (authorKey == null) {
             return Boolean.FALSE;
         }
 
-        if (membersMap.containsKey(authorKey)) {
-            if (!verifyService.verifyAuthorSignature(block, authorKey)) {
-                return Boolean.FALSE;
+        try {
+            if (!checkMember(authorKey, block)) {
+                dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress));
+
+                if (!checkMember(authorKey, block)) {
+                    return Boolean.FALSE;
+                }
             }
-        } else {
-            //FIXME: go to tracker
+        } catch (Exception e) {
+            e.printStackTrace();
             return Boolean.FALSE;
         }
 
