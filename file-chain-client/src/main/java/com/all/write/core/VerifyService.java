@@ -35,7 +35,7 @@ public class VerifyService {
             Key secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            byte[] outputBytes = cipher.doFinal(Base64.getDecoder().decode(encHash);
+            byte[] outputBytes = cipher.doFinal(Base64.getDecoder().decode(encHash));
 
             if (!Base64.getEncoder().encode(outputBytes).equals(hash)) {
                 return Boolean.FALSE;
@@ -44,5 +44,7 @@ public class VerifyService {
             e.printStackTrace();
             return Boolean.FALSE;
         }
+
+        return Boolean.TRUE;
     }
 }
