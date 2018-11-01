@@ -4,13 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>com.allwrite</groupId>
+        <artifactId>file-chain-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
     <groupId>tracker</groupId>
     <artifactId>tracker</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <properties>
         <main.basedir>${basedir}/../..</main.basedir>
         <servlet-api.version>3.1.0</servlet-api.version>
-        <spring.version>2.1.0</spring.version>
+        <spring.version>2.0.0.RELEASE</spring.version>
     </properties>
     <dependencies>
         <!-- Compile -->
@@ -44,6 +49,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.version}</version>
                     <executions>
                         <execution>
                             <id>repackage</id>
