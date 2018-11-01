@@ -38,7 +38,7 @@ public class RegistrationListener {
         // w/a spring shit
         new Thread(() -> {
             try {
-                Thread.sleep(10000);
+                Thread.sleep(20000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

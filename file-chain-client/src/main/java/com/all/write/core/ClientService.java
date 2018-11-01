@@ -115,7 +115,7 @@ public class ClientService {
         Map<String, Integer> countMap = new HashMap<>();
 
         for(NetworkMember networkMember: dataHolder.getAllNetworkMembers().values()) {
-            if (networkMember.equals(me)) {
+            if (networkMember.getAddress().equals(me.getAddress())) {
                 continue;
             }
             RestTemplate rt = new RestTemplate();
