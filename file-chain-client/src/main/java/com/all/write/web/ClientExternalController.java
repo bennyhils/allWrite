@@ -10,6 +10,8 @@ import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.core.VerifyService;
 import com.all.write.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -18,14 +20,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.Map;
 
 @RestController("clientExternalController")
 public class ClientExternalController implements ChainExternal {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientExternalController.class);
 
     @Autowired
     private StateHolder stateHolder;
@@ -90,7 +103,21 @@ public class ClientExternalController implements ChainExternal {
         System.out.println("The length of the file is : " + file2Upload.length());
 
         try {
-            return Files.readAllBytes(file2Upload.toPath());
+            byte[] secretKeyBytes = stateHolder.getSecretKey(fileHash);
+            Key secretKey = new SecretKeySpec(Base64.getEncoder().encode(secretKeyBytes), "AES");
+            Cipher cipher = null;
+            byte[] bytes = Files.readAllBytes(file2Upload.toPath());
+            byte[] outputBytes;
+            try (ByteArrayInputStream fos = new ByteArrayInputStream(bytes)) {
+                cipher = Cipher.getInstance("AES");
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+                outputBytes = cipher.doFinal(bytes);
+
+                return outputBytes;
+            } catch (IOException | NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
+                throw new RuntimeException(e);
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -110,10 +137,10 @@ public class ClientExternalController implements ChainExternal {
         return false;
     }
 
-    @GetMapping(value = "/requestKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = "/requestKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Override
     @ResponseBody
-    public byte[] requestKey(String fileHash) {
+    public byte[] requestKey(@RequestBody String fileHash) {
         return stateHolder.getSecretKey(fileHash);
     }
 
@@ -129,12 +156,14 @@ public class ClientExternalController implements ChainExternal {
                 || block.getReceiver() == null
                 || block.getSender() == null
                 || block.getAuthorSignature() == null) {
+            LOGGER.warn("block is partially empty {}.", block);
             return Boolean.FALSE;
         }
 
         String authorKey = StringUtil.getAuthorPublicKey(block);
 
         if (authorKey == null) {
+            LOGGER.warn("block author key is null {}.", block);
             return Boolean.FALSE;
         }
 
@@ -143,34 +172,41 @@ public class ClientExternalController implements ChainExternal {
                 dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress));
 
                 if (!checkMember(authorKey, block)) {
+                    LOGGER.warn("block author key verification failed {}.", block);
                     return Boolean.FALSE;
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+            LOGGER.warn("block secret key verification failed {}.", block, e);
             return Boolean.FALSE;
         }
 
-        String lastHash = dataHolder.getBlocks().isEmpty() ? null :
-                StringUtil.getHashOfBlock((Block)((LinkedList) dataHolder.getBlocks()).getLast());
+        String lastHash = StringUtil.getHashOfBlock(dataHolder.lastBlock());
 
-        if (lastHash == null ||  block.getPrevBlockHash().equals(lastHash)) {
+        if (block.getPrevBlockHash().equals(lastHash)) {
             if (block.getType() == Block.Type.SEND_KEY) {
                 String key = block.getSecretKey();
 
                 if (key == null) {
+                    LOGGER.warn("block secret key verification failed. Secret key is null <{}>", block);
                     return Boolean.FALSE;
                 }
 
                 if (!verifyService.verifyEncrypted(block.getFileHash(), block.getEncFileHash(), key)) {
+                    LOGGER.warn("block secret key verification failed. Secret key is invalid <{}>", block);
                     return Boolean.FALSE;
                 }
             }
 
             dataHolder.getBlocks().add(block);
+
+
+            LOGGER.info("block successfully added <{}>, chain size <{}>", block, dataHolder.getBlocks().size());
             return Boolean.TRUE;
         }
 
+        LOGGER.warn("block hash verification fail <{}>", block);
         return Boolean.FALSE;
     }
 

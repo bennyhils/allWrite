@@ -1,5 +1,6 @@
 import com.all.write.NetworkMember;
 import com.all.write.api.RequestingFileInfo;
+import org.junit.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,9 @@ import java.security.SecureRandom;
 import java.util.UUID;
 
 public class DownloadTest {
-    public static void main(String[] args) {
+
+    @Test
+    public void exchangeTest() {
         NetworkMember sender = new NetworkMember("todo-key", "localhost:8090");
         createUploadRequest(sender);
 

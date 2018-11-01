@@ -45,10 +45,8 @@ public class ClientInternalController implements ChainInternal {
     @Autowired
     private NetworkMember me;
 
-    @Autowired
-    private ClientExternalController clientExternalController;
-
     @Override
+    @CrossOrigin(origins = "http://localhost:8090")
     @RequestMapping(value = "/member/list", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity list(String filter) {
@@ -85,6 +83,7 @@ public class ClientInternalController implements ChainInternal {
         stateHolder.addOutgoingFiles(fileInfo);
         stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
 
+
         createSendFileRequest(fileInfo);
 
     }
@@ -114,7 +113,7 @@ public class ClientInternalController implements ChainInternal {
         messageConverters.add(new StringHttpMessageConverter());
 
         RestTemplate restTemplate = new RestTemplate(messageConverters);
-        String url = "http://" + fileInfo.getSender().getAddress() + "/acceptUploadRequest";
+        String url = "http://" + fileInfo.getSender().getAddress();
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/octet-stream");
@@ -122,27 +121,26 @@ public class ClientInternalController implements ChainInternal {
 
         HttpEntity<String> entity = new HttpEntity<>(fileInfo.getHash(), headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(url,
+        ResponseEntity<byte[]> response = restTemplate.exchange(url + "/acceptUploadRequest",
                 HttpMethod.POST, entity, byte[].class);
 
 
         writeFileReceivedBlock(fileInfo);
 
-        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(url + "/requestKey", HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
+        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(url + "/requestKey", HttpMethod.POST, entity, byte[].class,
+                fileInfo.getHash());
         byte[] secretKeyBytes = responseEntity.getBody();
-        String key = new String(secretKeyBytes);
-        Key secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
-        Cipher cipher = null;
+        Key secretKey = new SecretKeySpec(Base64.getEncoder().encode(secretKeyBytes), "AES");
+        Cipher cipher;
         byte[] outputBytes;
         try (FileOutputStream fos = new FileOutputStream(localFilePath)) {
             cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            outputBytes = cipher.doFinal(Base64.getDecoder().decode(response.getBody()));
+            outputBytes = cipher.doFinal(response.getBody());
             fos.write(outputBytes);
         } catch (IOException | NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
-
 
         writeFileSuccesfullyLoadedBlock();
     }
@@ -152,7 +150,6 @@ public class ClientInternalController implements ChainInternal {
     }
 
     private void writeFileReceivedBlock(RequestingFileInfo fileInfo) {
-
         Block fileReceivedBlock = new Block();
         fileReceivedBlock.setFileHash(fileInfo.getHash());
         fileReceivedBlock.setFileName(fileInfo.getOriginFilePath());

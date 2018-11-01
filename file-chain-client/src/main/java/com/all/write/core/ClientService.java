@@ -67,7 +67,7 @@ public class ClientService {
         List<NetworkMember> memberList = Arrays.asList(response.getBody());
 
         Map<String, NetworkMember> networkMemberMap = memberList.stream()
-                .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
+                .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i, (e1, e2) -> e1, LinkedHashMap::new));
 
         return networkMemberMap;
     }
