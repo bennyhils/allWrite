@@ -1,17 +1,13 @@
 package com.all.write.core;
 
 import com.all.write.NetworkMember;
-import com.all.write.StringUtil;
-import com.all.write.util.StringUtil;
 import com.all.write.api.Block;
+import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import javax.annotation.PostConstruct;
-import java.security.*;
-import java.security.spec.ECGenParameterSpec;
 
 @Component
 public class ClientService {
