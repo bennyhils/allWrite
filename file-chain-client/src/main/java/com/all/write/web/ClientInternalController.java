@@ -142,11 +142,25 @@ public class ClientInternalController implements ChainInternal {
             throw new RuntimeException(e);
         }
 
-        writeFileSuccesfullyLoadedBlock();
+        writeFileSuccesfullyLoadedBlock(fileInfo, secretKeyBytes);
     }
 
-    private void writeFileSuccesfullyLoadedBlock() {
+    private void writeFileSuccesfullyLoadedBlock(RequestingFileInfo fileInfo, byte[] secretKeyBytes) {
+        Block block = new Block();
+        block.setFileHash(fileInfo.getHash());
+        block.setFileName(fileInfo.getOriginFilePath());
+        block.setFileSize(fileInfo.getFileSize());
+        block.setEncFileHash(fileInfo.getEncFileHash());
 
+        block.setSecretKey(Base64.getEncoder().encodeToString(secretKeyBytes));
+        block.setSender(fileInfo.getSender().getPublicKey());
+        block.setType(Block.Type.SEND_KEY);
+        block.setReceiver(me.getPublicKey());
+        block.setReceiverAddress(me.getAddress());
+        block.setSenderAddress(fileInfo.getSender().getAddress());
+        block.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
+
+        clientService.sendBlockChainAndProcessResult(block);
     }
 
     private void writeFileReceivedBlock(RequestingFileInfo fileInfo) {

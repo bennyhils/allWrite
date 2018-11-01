@@ -149,7 +149,6 @@ public class ClientExternalController implements ChainExternal {
             return Boolean.FALSE;
         }
 
-        //FIXME: verify all fields
         if (block.getAuthorSignature() == null
                 || block.getReceiver() == null
                 || block.getSender() == null
