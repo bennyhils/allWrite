@@ -29,8 +29,10 @@ public class ClientInternalController implements ChainInternal {
     @RequestMapping(value = "/member/list", method = RequestMethod.GET)
     @ResponseBody
     public Response list(String filter) {
-        List<NetworkMember> data = dataHolder.getAllNetworkMembers();
-        return new Response(data);
+        List<NetworkMember> data = new ArrayList<>(dataHolder.getAllNetworkMembers().values());
+        Response response = new Response();
+        response.getData().put("list", data);
+        return response;
     }
 
     @Override

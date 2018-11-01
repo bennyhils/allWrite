@@ -15,7 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -49,13 +50,11 @@ public class RegistrationListener {
                 String uri = "http://" + localAddress + ":8080/tracker/list";
                 NetworkMember netMember = new NetworkMember("test-key", "localhost:8090");
                 Response response = rt.postForObject(uri, netMember, Response.class);
-                List<NetworkMember> memberList = (List<NetworkMember>) response.getData();
+                List<NetworkMember> memberList = (List<NetworkMember>) response.getData().get("list");
 
-                assert memberList != null;
-                dataHolder.setNetworkMembers(memberList);
 
-                assert returns != null;
-                Map<String, NetworkMember> networkMemberMap = Arrays.stream(returns).collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
+                Map<String, NetworkMember> networkMemberMap = memberList.stream()
+                        .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i));
                 dataHolder.setNetworkMembers(networkMemberMap);
 
                 if (memberList.size() == 1) {

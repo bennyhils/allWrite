@@ -32,7 +32,9 @@ public class TrackerController implements TrackerAPI {
 
         // and sync addition
         networkMemberDao.add(me);
-        return new Response(networkMemberDao.list());
+        Response response = new Response();
+        response.getData().put("list", networkMemberDao.list());
+        return response;
     }
 
 }
