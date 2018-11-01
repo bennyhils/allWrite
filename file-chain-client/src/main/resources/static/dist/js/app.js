@@ -432,7 +432,7 @@ function _init() {
    */
   $($.AdminLTE.options.logoutSelector).on("click", function () {
       sessionStorage.removeItem("authKey");
-      window.location = "/login";
+      window.location = "/login/index.html";
   });
 
   $.AdminLTE.controlSidebar = {
