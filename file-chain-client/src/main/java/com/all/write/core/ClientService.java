@@ -51,6 +51,6 @@ public class ClientService {
     }
 
     public String getBase64EncodedPublicKey() {
-        return Utils.getBase64Encoded(publicKey);
+        return StringUtil.getBase64Encoded(publicKey);
     }
 }

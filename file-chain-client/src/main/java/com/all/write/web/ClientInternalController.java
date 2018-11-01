@@ -9,7 +9,7 @@ import com.all.write.api.rest.ChainInternal;
 import com.all.write.core.ClientService;
 import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
-import com.all.write.core.Utils;
+import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -126,9 +126,9 @@ public class ClientInternalController implements ChainInternal {
 
         fileDto.setProgress(100.);
         fileDto.setSpeed(4096L);
-        fileDto.setReceiver(new NetworkMember(Utils.getBase64Encoded(block.getReceiver()),
+        fileDto.setReceiver(new NetworkMember(StringUtil.getBase64Encoded(block.getReceiver()),
                 block.getReceiverAddress()));
-        fileDto.setSender(new NetworkMember(Utils.getBase64Encoded(block.getSender()),
+        fileDto.setSender(new NetworkMember(StringUtil.getBase64Encoded(block.getSender()),
                 block.getSenderAddress()));
 
         return fileDto;

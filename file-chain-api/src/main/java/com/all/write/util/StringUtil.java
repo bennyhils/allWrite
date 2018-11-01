@@ -1,5 +1,7 @@
 package com.all.write.util;
 
+import com.all.write.api.Block;
+
 import java.security.*;
 import java.util.Base64;
 
@@ -86,4 +88,20 @@ public class StringUtil {
 //		String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
 //		return merkleRoot;
 //	}
+
+	public static String getBase64Encoded(PublicKey publicKey) {
+		if (publicKey != null) {
+			return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+		}
+
+		return null;
+	}
+
+	public static String getHashOfBlock(Block block) {
+		if (block == null) {
+			return null;
+		}
+
+		return applySha256(block.toString().getBytes());
+	}
 }
