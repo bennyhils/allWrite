@@ -14,7 +14,7 @@ import java.util.Objects;
 public class RequestingFileInfo {
     private String originFilePath;
     private String hash;
-    private String hashOfEncrypted;
+    private String encFileHash;
     private Long fileSize;
     private NetworkMember sender;
 
@@ -30,6 +30,10 @@ public class RequestingFileInfo {
         } catch (IOException ignored) {
 
         }
+
+        // todo ecnrypt
+        fileInfo.encFileHash = fileInfo.hash;
+
 
         return fileInfo;
     }
@@ -50,11 +54,11 @@ public class RequestingFileInfo {
     }
 
     public String getEncFileHash() {
-        return hashOfEncrypted;
+        return encFileHash;
     }
 
-    public void setHashOfEncrypted(String hashOfEncrypted) {
-        this.hashOfEncrypted = hashOfEncrypted;
+    public void setEncFileHash(String encFileHash) {
+        this.encFileHash = encFileHash;
     }
 
     public Long getFileSize() {
@@ -80,13 +84,13 @@ public class RequestingFileInfo {
         RequestingFileInfo that = (RequestingFileInfo) o;
         return Objects.equals(originFilePath, that.originFilePath) &&
                 Objects.equals(hash, that.hash) &&
-                Objects.equals(hashOfEncrypted, that.hashOfEncrypted) &&
+                Objects.equals(encFileHash, that.encFileHash) &&
                 Objects.equals(fileSize, that.fileSize) &&
                 Objects.equals(sender, that.sender);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(originFilePath, hash, hashOfEncrypted, fileSize, sender);
+        return Objects.hash(originFilePath, hash, encFileHash, fileSize, sender);
     }
 }

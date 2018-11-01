@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,11 +55,6 @@ public class ClientInternalController implements ChainInternal {
     @PostMapping("/uploadRequest")
     public void uploadRequest(String fileLocalPath, NetworkMember targetNetworkMember) {
 
-        File file = new File(fileLocalPath);
-        if (!file.exists()) {
-            throw new RuntimeException("file not found");
-        }
-
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -68,6 +62,8 @@ public class ClientInternalController implements ChainInternal {
         RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath, me);
         String uri = "http://" + targetNetworkMember.getAddress() + "/receiveFileRequest";
         rt.postForObject(uri,  fileInfo, RequestingFileInfo.class);
+
+        stateHolder.addOutgoingFiles(fileInfo);
 
         createSendFileRequest(fileInfo);
 

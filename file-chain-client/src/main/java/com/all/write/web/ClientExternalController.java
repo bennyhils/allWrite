@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.LinkedList;
 
 @Controller("clientExternalController")
@@ -62,8 +63,10 @@ public class ClientExternalController implements ChainExternal {
     }
 
     @Override
-    public void ackReceiveAndDownload(String fileHash) {
-
+    public void acceptUploadRequest(String fileHash) {
+        //call download
+        RequestingFileInfo outgoingInfo = stateHolder.getOutgoingRequest(fileHash);
+        File file = new File(outgoingInfo.getOriginFilePath());
     }
 
     @Override

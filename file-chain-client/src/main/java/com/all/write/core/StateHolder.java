@@ -4,12 +4,14 @@ import com.all.write.api.RequestingFileInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 @Component
 public class StateHolder {
     private List<RequestingFileInfo> requestingFileInfos = new ArrayList<>();
+    private HashMap<String, RequestingFileInfo> outgoingRequest = new HashMap<>();
 
     public List<RequestingFileInfo> getRequestingFileInfos() {
         return requestingFileInfos;
@@ -29,5 +31,13 @@ public class StateHolder {
             }
         }
         return false;
+    }
+
+    public void addOutgoingFiles(RequestingFileInfo requestingFileInfo) {
+        outgoingRequest.put(requestingFileInfo.getHash(), requestingFileInfo);
+    }
+
+    public RequestingFileInfo getOutgoingRequest(String fileHash) {
+        return outgoingRequest.get(fileHash);
     }
 }
