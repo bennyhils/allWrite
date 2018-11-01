@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface ChainExternal {
     String ping();
-    Response pingExt();
+    ResponseEntity pingExt();
     ResponseEntity getChain();
     void receiveFileRequest(RequestingFileInfo requestingFileInfo);
     void ackReceiveAndDownload(String fileHash);

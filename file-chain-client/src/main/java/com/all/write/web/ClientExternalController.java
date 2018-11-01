@@ -3,7 +3,6 @@ package com.all.write.web;
 import com.all.write.api.Block;
 import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainExternal;
-import com.all.write.api.rest.Response;
 import com.all.write.core.DataHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,7 +34,7 @@ public class ClientExternalController implements ChainExternal {
     }
 
     @Override
-    public Response pingExt() {
+    public ResponseEntity pingExt() {
         return null;
     }
 
