@@ -39,6 +39,9 @@ public class ClientInternalController implements ChainInternal {
     @Autowired
     private ClientService clientService;
 
+    @Autowired
+    private NetworkMember me;
+
     @Override
     @RequestMapping(value = "/member/list", method = RequestMethod.GET)
     @ResponseBody
@@ -54,7 +57,7 @@ public class ClientInternalController implements ChainInternal {
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-        RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath/*, clientService.publicKey()*/);
+        RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath, me);
 
     }
 

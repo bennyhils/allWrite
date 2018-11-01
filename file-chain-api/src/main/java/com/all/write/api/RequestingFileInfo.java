@@ -1,8 +1,15 @@
 package com.all.write.api;
 
 import com.all.write.NetworkMember;
+import com.all.write.util.StringUtil;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
@@ -14,11 +21,19 @@ public class RequestingFileInfo {
     private NetworkMember sender;
 
 
-    public static RequestingFileInfo createFileInfo(String path){
+    public static RequestingFileInfo createFileInfo(String filePath, NetworkMember sender){
         RequestingFileInfo fileInfo = new RequestingFileInfo();
-        fileInfo.originFilePath = path;
+        fileInfo.originFilePath = filePath;
+        fileInfo.sender = sender;
+        //TODO: проверка пути до файла
+        Path path = Paths.get(filePath);
+        try {
+            fileInfo.hash = StringUtil.applySha256(Files.readAllBytes(path));
+        } catch (IOException ignored) {
 
-        return null;
+        }
+
+        return fileInfo;
     }
     public String getOriginFilePath() {
         return originFilePath;

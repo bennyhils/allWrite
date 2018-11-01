@@ -1,4 +1,6 @@
-package com.all.write;
+package com.all.write.util;
+
+import com.all.write.api.Block;
 
 import java.security.*;
 import java.util.Base64;
@@ -6,13 +8,13 @@ import java.util.Base64;
 public class StringUtil {
 	
 	//Applies Sha256 to a string and returns the result. 
-	public static String applySha256(String input){
+	public static String applySha256(byte[] input){
 		
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 	        
 			//Applies sha256 to our input, 
-			byte[] hash = digest.digest(input.getBytes("UTF-8"));
+			byte[] hash = digest.digest(input);
 	        
 			StringBuffer hexString = new StringBuffer(); // This will contain hash as hexidecimal
 			for (int i = 0; i < hash.length; i++) {
@@ -86,4 +88,20 @@ public class StringUtil {
 //		String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
 //		return merkleRoot;
 //	}
+
+	public static String getBase64Encoded(PublicKey publicKey) {
+		if (publicKey != null) {
+			return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+		}
+
+		return null;
+	}
+
+	public static String getHashOfBlock(Block block) {
+		if (block == null) {
+			return null;
+		}
+
+		return applySha256(block.toString().getBytes());
+	}
 }

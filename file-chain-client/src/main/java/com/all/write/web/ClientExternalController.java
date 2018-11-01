@@ -1,13 +1,13 @@
 package com.all.write.web;
 
 import com.all.write.api.Block;
+import com.all.write.api.LocalChainData;
 import com.all.write.api.RequestingFileInfo;
 import com.all.write.api.rest.ChainExternal;
 import com.all.write.core.StateHolder;
+import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.all.write.api.rest.Response;
 import com.all.write.core.DataHolder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
+import java.util.LinkedList;
 
 @Controller("clientExternalController")
 public class ClientExternalController implements ChainExternal {
@@ -41,7 +42,12 @@ public class ClientExternalController implements ChainExternal {
 
     @Override
     public ResponseEntity pingExt() {
-        return null;
+        LocalChainData chain = new LocalChainData();
+        chain.setChainLength(Long.valueOf(dataHolder.getBlocks().size()));
+        chain.setLastBlockHash(dataHolder.getBlocks().isEmpty() ? "" :
+                StringUtil.getHashOfBlock((Block)((LinkedList) dataHolder.getBlocks()).getLast()));
+        return new ResponseEntity<>(chain,
+                HttpStatus.OK);
     }
 
     @Override
