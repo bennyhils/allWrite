@@ -17,14 +17,26 @@ public class NetworkMemberDaoImpl implements NetworkMemberDao {
     private final LinkedHashMap<String, NetworkMember> repo = new LinkedHashMap<>();
 
     @Override
-    public List<NetworkMember> list() {
+    public synchronized List<NetworkMember> list() {
         return new ArrayList<>(repo.values());
     }
 
     @Override
-    public void add(NetworkMember networkMember) {
-        if(repo.putIfAbsent(networkMember.getPublicKey(), networkMember) != null) {
-            LOGGER.error("already exist");
+    public synchronized void remove(NetworkMember networkMember) {
+        repo.remove(networkMember.getPublicKey());
+
+        LOGGER.info("Network member removed {}", networkMember);
+    }
+
+    @Override
+    public synchronized void add(NetworkMember networkMember) {
+        NetworkMember currentMember = repo.putIfAbsent(networkMember.getPublicKey(), networkMember);
+        if(currentMember != null) {
+            LOGGER.info("Network member already exist current {}, try add member {}",
+                    currentMember, networkMember);
+        } else {
+            LOGGER.info("Network member successfully added {}, current member count {}",
+                    networkMember, repo.size());
         }
     }
 }

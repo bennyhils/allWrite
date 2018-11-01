@@ -7,6 +7,7 @@ import java.util.List;
 public interface NetworkMemberDao {
 
     List<NetworkMember> list();
+    void remove(NetworkMember networkMember);
     void add(NetworkMember networkMember);
 
 }
