@@ -11,7 +11,7 @@ public interface ChainInternal {
     ResponseEntity list(String filter);
     void uploadRequest(String fileLocalPath, NetworkMember targetExternalAddress);
     List<RequestingFileInfo> listRequests();
-    void download(RequestingFileInfo fileInfo, String localFilePath);
+    void download(String localFilePath, RequestingFileInfo fileInfo);
     List<FileDto> getOutgoingFiles();
     List<FileDto> getIncomingFiles();
 }

@@ -16,15 +16,17 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.FileOutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
-@Controller
+@RestController
 public class ClientInternalController implements ChainInternal {
 
     @Autowired
@@ -87,24 +89,24 @@ public class ClientInternalController implements ChainInternal {
     }
 
     @Override
-    @GetMapping("/download")
-    public void download(RequestingFileInfo fileInfo, String localFilePath) {
+    @PostMapping(value = "/download")
+    public void download(String localFilePath, RequestingFileInfo fileInfo) {
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
         messageConverters.add(new ByteArrayHttpMessageConverter());
 
         RestTemplate restTemplate = new RestTemplate(messageConverters);
         String uri = "http://" + fileInfo.getSender().getAddress() + "/acceptUploadRequest";
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
+        headers.add("Accept", "application/octet-stream");
+
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         ResponseEntity<byte[]> response = restTemplate.exchange(uri,
-                HttpMethod.GET, entity, byte[].class, "1");
+                HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
 
         try (FileOutputStream fos = new FileOutputStream(localFilePath)) {
             fos.write(response.getBody());
-            //fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

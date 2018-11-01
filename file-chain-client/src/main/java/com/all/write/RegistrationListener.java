@@ -49,7 +49,7 @@ public class RegistrationListener {
         // w/a spring shit
         new Thread(() -> {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
