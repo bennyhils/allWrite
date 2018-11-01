@@ -2,16 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>com.allwrite</groupId>
         <artifactId>file-chain-parent</artifactId>
+        <groupId>com.allwrite</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tracker</groupId>
-    <artifactId>tracker</artifactId>
+    <artifactId>file-chain-client</artifactId>
     <dependencies>
         <!-- Compile -->
         <dependency>
@@ -54,7 +52,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <mainClass>com.all.write.TrackerApplication</mainClass>
+                        <mainClass>com.all.write.ClientApplication</mainClass>
                     </configuration>
                 </plugin>
             </plugins>
@@ -66,5 +64,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>

@@ -9,7 +9,15 @@
     <modules>
         <module>tracker</module>
         <module>file-chain-api</module>
+        <module>file-chain-client</module>
     </modules>
+
+    <properties>
+        <main.basedir>${basedir}/../..</main.basedir>
+        <servlet-api.version>3.1.0</servlet-api.version>
+        <spring.version>2.0.0.RELEASE</spring.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
