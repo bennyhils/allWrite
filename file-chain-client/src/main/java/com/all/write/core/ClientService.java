@@ -183,7 +183,7 @@ public class ClientService {
                 }
             }
 
-            dataHolder.setBlocks(newChain);
+//            dataHolder.setBlocks(newChain);
             Block prevBlock = dataHolder.lastBlock();
             for(Block myBlock: oldCopy) {
                 myBlock.setPrevBlockHash(StringUtil.getHashOfBlock(prevBlock));
