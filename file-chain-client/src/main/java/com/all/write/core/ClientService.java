@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
+import java.util.Base64;
 
 @Component
 public class ClientService {
@@ -48,5 +49,9 @@ public class ClientService {
 
     public PublicKey publicKey() {
         return publicKey;
+    }
+
+    public String getBase64EncodedPublicKey() {
+        return Utils.getBase64Encoded(publicKey);
     }
 }

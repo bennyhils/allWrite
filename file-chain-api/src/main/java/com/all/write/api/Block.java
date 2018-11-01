@@ -1,6 +1,7 @@
 package com.all.write.api;
 
 import java.security.PublicKey;
+import java.util.Arrays;
 
 public class Block {
     public enum Type {
@@ -10,6 +11,10 @@ public class Block {
         GENESIS(4);
 
         private int value;
+
+        public int getValue() {
+            return value;
+        }
 
         Type(int value) {
             this.value = value;
@@ -24,7 +29,9 @@ public class Block {
     private String fileName;
     private Long fileSize;
     private PublicKey sender;
-    private String receiver;
+    private String senderAddress;
+    private PublicKey receiver;
+    private String receiverAddress;
 
     public Type getType() {
         return type;
@@ -98,14 +105,29 @@ public class Block {
         this.sender = sender;
     }
 
-    public String getReceiver() {
+    public String getSenderAddress() {
+        return senderAddress;
+    }
+
+    public void setSenderAddress(String senderAddress) {
+        this.senderAddress = senderAddress;
+    }
+
+    public PublicKey getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(String receiver) {
+    public void setReceiver(PublicKey receiver) {
         this.receiver = receiver;
     }
 
+    public String getReceiverAddress() {
+        return receiverAddress;
+    }
+
+    public void setReceiverAddress(String receiverAddress) {
+        this.receiverAddress = receiverAddress;
+    }
 
     @Override
     public String toString() {
@@ -114,11 +136,14 @@ public class Block {
                 ", fileHash='" + fileHash + '\'' +
                 ", encFileHash='" + encFileHash + '\'' +
                 ", privBlockHash='" + privBlockHash + '\'' +
+                ", authorSignature=" + Arrays.toString(authorSignature) +
                 ", secretKey='" + secretKey + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", fileSize=" + fileSize +
-                ", sender='" + sender + '\'' +
-                ", receiver='" + receiver + '\'' +
+                ", sender=" + sender +
+                ", senderAddress='" + senderAddress + '\'' +
+                ", receiver=" + receiver +
+                ", receiverAddress='" + receiverAddress + '\'' +
                 '}';
     }
 }
