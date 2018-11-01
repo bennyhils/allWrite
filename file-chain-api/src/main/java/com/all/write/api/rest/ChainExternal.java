@@ -4,8 +4,6 @@ import com.all.write.api.Block;
 import com.all.write.api.RequestingFileInfo;
 import org.springframework.http.ResponseEntity;
 
-import javax.servlet.http.HttpServletRequest;
-
 public interface ChainExternal {
     String ping();
     ResponseEntity pingExt();
@@ -14,5 +12,5 @@ public interface ChainExternal {
     byte[] acceptUploadRequest(String fileHash);
     byte[] requestKey(String fileHash);
 
-    Boolean addBlock(Block block, HttpServletRequest request);
+    Boolean addBlock(Block block);
 }

@@ -125,6 +125,7 @@ public class StringUtil {
             oos.flush();
             bytes = bos.toByteArray();
         } catch (Exception e) {
+        	e.printStackTrace();
         }
 
         return bytes;

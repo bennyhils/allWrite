@@ -19,15 +19,13 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.*;
-import java.util.*;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -82,7 +80,7 @@ public class ClientInternalController implements ChainInternal {
 
         RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo(fileLocalPath, me, secretKey);
         String uri = "http://" + targetNetworkMember.getAddress() + "/receiveFileRequest";
-        rt.postForObject(uri,  fileInfo, RequestingFileInfo.class);
+        rt.postForObject(uri, fileInfo, RequestingFileInfo.class);
 
         stateHolder.addOutgoingFiles(fileInfo);
         stateHolder.addFileSecretKey(fileInfo.getHash(), secretKeyBytes);
@@ -113,23 +111,24 @@ public class ClientInternalController implements ChainInternal {
     public void download(String localFilePath, @RequestBody RequestingFileInfo fileInfo) {
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
         messageConverters.add(new ByteArrayHttpMessageConverter());
+        messageConverters.add(new StringHttpMessageConverter());
 
         RestTemplate restTemplate = new RestTemplate(messageConverters);
-        String uri = "http://" + fileInfo.getSender().getAddress();
+        String url = "http://" + fileInfo.getSender().getAddress() + "/acceptUploadRequest";
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/octet-stream");
 
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        HttpEntity<String> entity = new HttpEntity<>(fileInfo.getHash(), headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(uri + "/acceptUploadRequest",
-                HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
-
+        ResponseEntity<byte[]> response = restTemplate.exchange(url,
+                HttpMethod.POST, entity, byte[].class);
 
 
         writeFileReceivedBlock(fileInfo);
 
-        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(uri + "/requestKey", HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
+        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(url + "/requestKey", HttpMethod.GET, entity, byte[].class, fileInfo.getHash());
         byte[] secretKeyBytes = responseEntity.getBody();
         String key = new String(secretKeyBytes);
         Key secretKey = new SecretKeySpec(Base64.getDecoder().decode(key), "AES");
@@ -140,7 +139,7 @@ public class ClientInternalController implements ChainInternal {
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             outputBytes = cipher.doFinal(Base64.getDecoder().decode(response.getBody()));
             fos.write(outputBytes);
-        } catch (IOException| NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
+        } catch (IOException | NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
 
@@ -166,6 +165,7 @@ public class ClientInternalController implements ChainInternal {
         fileReceivedBlock.setReceiver(me.getPublicKey());
         fileReceivedBlock.setReceiverAddress(me.getAddress());
         fileReceivedBlock.setSenderAddress(fileInfo.getSender().getAddress());
+        fileReceivedBlock.setPrevBlockHash(StringUtil.getHashOfBlock(dataHolder.lastBlock()));
 
 
         for (NetworkMember member : dataHolder.getAllNetworkMembers().values()) {
@@ -183,7 +183,7 @@ public class ClientInternalController implements ChainInternal {
 
         }
 
-        clientExternalController.addBlock(fileReceivedBlock, null);
+        clientExternalController.addBlock(fileReceivedBlock);
 
     }
 
@@ -227,7 +227,7 @@ public class ClientInternalController implements ChainInternal {
         }
         // downloads history
         List<RequestingFileInfo> requestingFileInfoList = stateHolder.getRequestingFileInfos();
-        for (RequestingFileInfo requestingFileInfo: requestingFileInfoList) {
+        for (RequestingFileInfo requestingFileInfo : requestingFileInfoList) {
             ret.add(convertRequestToFileDto(requestingFileInfo));
         }
 

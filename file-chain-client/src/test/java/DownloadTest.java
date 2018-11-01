@@ -7,6 +7,9 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.security.SecureRandom;
 import java.util.UUID;
 
 public class DownloadTest {
@@ -19,7 +22,21 @@ public class DownloadTest {
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         String uri = "http://localhost:8090/download?localFilePath=/tmp/" + UUID.randomUUID().toString() + ".txt";
 
-        RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo("/home/roman/1.txt", sender, null);
+        byte[] secretKeyBytes = null;
+        SecretKey secretKey = null;
+
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            SecureRandom random = new SecureRandom(); // cryptograph. secure random
+            keyGen.init(random);
+            secretKey = keyGen.generateKey();
+            secretKeyBytes = secretKey.getEncoded();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        RequestingFileInfo fileInfo = RequestingFileInfo.createFileInfo("/home/roman/1.txt", sender, secretKey);
 
         ResponseEntity response = rt.exchange(uri, HttpMethod.POST,
                 new HttpEntity<>(fileInfo), Object.class);

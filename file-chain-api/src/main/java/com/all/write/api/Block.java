@@ -1,8 +1,9 @@
 package com.all.write.api;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Block {
+public class Block implements Serializable {
     public enum Type {
         SEND_FILE(0),
         GET_FILE(1),

@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,11 +81,10 @@ public class ClientExternalController implements ChainExternal {
     }
 
     @Override
-    @GetMapping(value = "/acceptUploadRequest", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = "/acceptUploadRequest", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
-    public byte[] acceptUploadRequest(String fileHash) {
+    public byte[] acceptUploadRequest(@RequestBody String fileHash) {
         RequestingFileInfo outgoingInfo = stateHolder.getOutgoingRequest(fileHash);
-
 
         File file2Upload = new File(outgoingInfo.getOriginFilePath());
         System.out.println("The length of the file is : " + file2Upload.length());
@@ -121,11 +119,10 @@ public class ClientExternalController implements ChainExternal {
 
     @Override
     @PostMapping("/addBlock")
-    public Boolean addBlock(@RequestBody Block block, HttpServletRequest request) {
+    public Boolean addBlock(@RequestBody Block block) {
         if (block == null) {
             return Boolean.FALSE;
         }
-        request.getRequestURI();
 
         //FIXME: verify all fields
         if (block.getAuthorSignature() == null
