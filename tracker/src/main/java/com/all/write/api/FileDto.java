@@ -1,14 +1,14 @@
 package com.all.write.api;
 
 public class FileDto {
-    String id;
-    String name;
-    Long size;
-    Double progress;
-    Long speed;
-    ExternalAddress sender;
-    ExternalAddress receiver;
-    FileStatus fileStatus;
+    private String id;
+    private String name;
+    private Long size;
+    private Double progress;
+    private Long speed;
+    private ExternalAddress sender;
+    private ExternalAddress receiver;
+    private FileStatus fileStatus;
 
     public String getId() {
         return id;
