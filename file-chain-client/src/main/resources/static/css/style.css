@@ -131,4 +131,9 @@
     }
 }
 
-
+.info-box[status="0"] .info-box-icon {
+    cursor: pointer;
+}
+.info-box[status="0"] .info-box-icon:hover {
+    background-color: rgba(0,0,0,0.35);
+}

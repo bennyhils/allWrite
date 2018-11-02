@@ -254,7 +254,7 @@ public class ClientInternalController implements ChainInternal {
         fileDto.setFileStatus(FileStatus.TRANSFER);
         fileDto.setProgress(0.);
         fileDto.setName(requestingFileInfo.getOriginFilePath());
-        fileDto.setSpeed(new Random().nextLong() % (requestingFileInfo.getFileSize() / 10 + 1));
+//        fileDto.setSpeed(new Random().nextLong() % (requestingFileInfo.getFileSize() / 10 + 1));
         return fileDto;
     }
 

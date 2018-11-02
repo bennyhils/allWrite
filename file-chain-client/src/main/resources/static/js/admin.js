@@ -21,6 +21,7 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
             value = value.substr(value.lastIndexOf("\\")+1);
             sendRequest(Config.EndPoints.uploadRequest + "?fileLocalPath=" + value, JSON.stringify(to), function (data) {
                 updateData();
+                $('[href="#tab-3"]').click();
             }, undefined, undefined);
         })
     }
@@ -46,6 +47,7 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
             fileElem.removeClass("bg-aqua");
             fileElem.removeClass("bg-green");
             fileElem.removeClass("bg-red");
+            fileElem.attr("status", file.status);
             if (file.status == 0) {
                 fileElem.addClass("bg-yellow");
             } else if (file.status == 1) {
@@ -101,7 +103,7 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
             } else if (file.status == 3) {
                 fileElem.addClass("bg-red");
             }
-
+            fileElem.attr("status", file.status);
             let icon = $('<span>', {
                 class: "info-box-icon"
             }).append($('<i>', {
@@ -211,7 +213,7 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
             let text2 = fileElem.find('.info-box-number');
             let text3 = fileElem.find('.progress-description');
             if (file.status == 0) {
-                text1.text("Ожидает подтверждения");
+                text1.text("Ожидает подтверждения от " + file.receiver.address);
             } else if (file.status == 1) {
                 text1.text("Идет загрузка");
             } else if (file.status == 2) {
@@ -256,7 +258,7 @@ DateTimePickerFormat = "YYYY.MM.DD HH:mm:ss";
                 class: "info-box-number"
             });
             if (file.status == 0) {
-                text1.text("Ожидает подтверждения");
+                text1.text("Ожидает подтверждения от " + file.receiver.address);
             } else if (file.status == 1) {
                 text1.text("Идет загрузка");
             } else if (file.status == 2) {
