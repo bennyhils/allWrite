@@ -11,6 +11,7 @@ import com.all.write.core.DataHolder;
 import com.all.write.core.StateHolder;
 import com.all.write.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -32,6 +33,9 @@ import java.util.*;
 
 @RestController
 public class ClientInternalController implements ChainInternal {
+
+    @Value("${template.folder}")
+    private String templateFolder;
 
     @Autowired
     private DataHolder dataHolder;
@@ -57,6 +61,7 @@ public class ClientInternalController implements ChainInternal {
     @PostMapping("/uploadRequest")
     public void uploadRequest(String fileLocalPath, @RequestBody NetworkMember targetNetworkMember) {
 
+        fileLocalPath = templateFolder + fileLocalPath;
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new StringHttpMessageConverter());
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -248,8 +253,8 @@ public class ClientInternalController implements ChainInternal {
         fileDto.setId(requestingFileInfo.getHash());
         fileDto.setFileStatus(FileStatus.TRANSFER);
         fileDto.setProgress(0.);
-        //todo to nayob or not to nayob, vot v chem vopros
-//        fileDto.setSpeed(new Random().nextLong() % (requestingFileInfo.getFileSize() / 10));
+        fileDto.setName(requestingFileInfo.getOriginFilePath());
+        fileDto.setSpeed(new Random().nextLong() % (requestingFileInfo.getFileSize() / 10 + 1));
         return fileDto;
     }
 

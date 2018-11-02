@@ -90,7 +90,7 @@ public class ClientExternalController implements ChainExternal {
 
     @PostMapping("/receiveFileRequest")
     @Override
-    public void receiveFileRequest(RequestingFileInfo requestingFileInfo) {
+    public void receiveFileRequest(@RequestBody RequestingFileInfo requestingFileInfo) {
         stateHolder.addRequestingFileInfo(requestingFileInfo);
     }
 

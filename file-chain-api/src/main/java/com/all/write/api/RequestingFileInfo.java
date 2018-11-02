@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,7 +30,9 @@ public class RequestingFileInfo {
         try {
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            fileInfo.hash = StringUtil.applySha256(Files.readAllBytes(path));
+            byte[] fileBytes = Files.readAllBytes(path);
+            fileInfo.setFileSize((long) fileBytes.length);
+            fileInfo.hash = StringUtil.applySha256(fileBytes);
             fileInfo.encFileHash = Base64.getEncoder()
                     .encodeToString(cipher.doFinal(fileInfo.hash.getBytes()));
         } catch (Exception e) {

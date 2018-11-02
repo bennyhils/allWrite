@@ -52,8 +52,9 @@ public class RegistrationListener {
                     dataHolder.setBlocks(clientService.sendPingExtAndGetChain(0));
                 }
             } catch (Exception e) {
-                System.out.println("err " + e);
+                System.out.println("start fail " + e);
                 e.printStackTrace();
+                System.exit(0);
             }
         }).start();
     }
