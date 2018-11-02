@@ -45,35 +45,30 @@ public class ClientService {
         block.setAuthorSignature(signature);
     }
 
-    /**
-     * check if block sender is author
-     */
-    public boolean verifySignature(Block block, PublicKey sender) {
-        byte [] data = StringUtil.getBlockBytes(block);
-        return StringUtil.verifyECDSASig(sender, data, block.getAuthorSignature());
-    }
-
     public String getBase64EncodedPublicKey() {
         return StringUtil.getBase64Encoded(publicKey);
     }
 
-    public Map<String, NetworkMember> getNetworkMembersFromTracker(String trackerAddress) {
+    public Map<String, NetworkMember> getNetworkMembersFromTracker(String trackerAddress, boolean register) {
         RestTemplate rt = new RestTemplate();
         rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         rt.getMessageConverters().add(new StringHttpMessageConverter());
-        String uri = "http://" + trackerAddress + ":8080/tracker/list";
+        String method = "/tracker/list";
+        if (register) {
+            method = "/tracker/register";
+        }
+        String uri = "http://" + trackerAddress + ":8080" + method;
         ResponseEntity<NetworkMember[]> response = rt.exchange(uri, HttpMethod.POST,
                 new HttpEntity<>(me), NetworkMember[].class);
         List<NetworkMember> memberList = Arrays.asList(response.getBody());
 
-        Map<String, NetworkMember> networkMemberMap = memberList.stream()
-                .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i, (e1, e2) -> e1, LinkedHashMap::new));
-
-        return networkMemberMap;
+        return memberList.stream()
+                .collect(Collectors.toMap(NetworkMember::getPublicKey, i -> i,
+                        (e1, e2) -> e1, LinkedHashMap::new));
     }
 
-    public int sendBlockToChain(Block block) {
-        dataHolder.setNetworkMembers(getNetworkMembersFromTracker(trackerAddress));
+    private int sendBlockToChain(Block block) {
+        dataHolder.setNetworkMembers(getNetworkMembersFromTracker(trackerAddress, false));
         int negativeCount = 0;
         int positiveCount = 0;
 
@@ -136,7 +131,8 @@ public class ClientService {
                 count = 0;
             }
 
-            countMap.put(lastBlockHash, Integer.valueOf(++count));
+            count++;
+            countMap.put(lastBlockHash, count);
         }
 
         int maxCount = 0;
@@ -149,19 +145,19 @@ public class ClientService {
             }
         }
 
-        if (maxCount > (-1 * positiveCount)) {
+        if (maxCount >= (-1 * positiveCount)) {
             NetworkMember maxMember = localChainDataMap.get(keyOfMax);
             return  obtainBlockChain(maxMember);
         }
 
-        return Collections.EMPTY_LIST;
+        throw new RuntimeException("requested block chain is empty");
     }
 
     public void sendBlockChainAndProcessResult(Block block) {
         sendBlockChainAndProcessResult(block, 0);
     }
 
-    public void sendBlockChainAndProcessResult(Block block, int invokeCount) {
+    private void sendBlockChainAndProcessResult(Block block, int invokeCount) {
         if (invokeCount > 5) {
             return;
         }
@@ -175,30 +171,28 @@ public class ClientService {
             List<Block> oldCopy = new ArrayList<>(oldChain);
             oldCopy.add(block);
 
-            for (Block newBlock: newChain) {
-                for (Block oldBlock: oldChain) {
-                    if (StringUtil.getHashOfBlock(newBlock).equals(StringUtil.getHashOfBlock(oldBlock))) {
-                        oldCopy.remove(oldBlock);
-                    }
+            Iterator<Block> oldChainIt = oldChain.iterator();
+            for (Block newBlock : newChain) {
+                if (!oldChainIt.hasNext()) {
+                    break;
+                }
+                Block oldBlock = oldChainIt.next();
+                if (StringUtil.getHashOfBlock(newBlock).equals(StringUtil.getHashOfBlock(oldBlock))) {
+                    oldCopy.remove(oldBlock);
                 }
             }
 
-            if (!newChain.isEmpty()) {
-                dataHolder.setBlocks(newChain);
-                Block prevBlock = dataHolder.lastBlock();
-                for (Block myBlock : oldCopy) {
-                    myBlock.setPrevBlockHash(StringUtil.getHashOfBlock(prevBlock));
-                    signBlock(myBlock);
-                    prevBlock = myBlock;
-                    sendBlockChainAndProcessResult(myBlock, ++invokeCount);
-                }
-            } else {
-                dataHolder.addBlock(block);
+            dataHolder.setBlocks(newChain);
+            Block prevBlock = dataHolder.lastBlock();
+            for (Block myBlock : oldCopy) {
+                myBlock.setPrevBlockHash(StringUtil.getHashOfBlock(prevBlock));
+                prevBlock = myBlock;
+                sendBlockChainAndProcessResult(myBlock, ++invokeCount);
             }
         }
     }
 
-    public List<Block> obtainBlockChain(NetworkMember member) {
+    private List<Block> obtainBlockChain(NetworkMember member) {
         // choose true chain holder
         String address = member.getAddress();
 

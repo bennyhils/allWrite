@@ -6,13 +6,9 @@ import com.all.write.service.MemberChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 public class TrackerController implements TrackerAPI {
 
     @Autowired
@@ -20,6 +16,29 @@ public class TrackerController implements TrackerAPI {
 
     @Autowired
     private MemberChecker memberChecker;
+
+    @ResponseBody
+    @RequestMapping(value = "/tracker/register", method = RequestMethod.POST)
+    public ResponseEntity memberRegister(@RequestBody NetworkMember me) {
+
+        //async ping
+        if (!memberChecker.pingMember(me)) {
+            throw new RuntimeException("Ping member failed! Member: " + me);
+        }
+
+        // and sync addition
+        networkMemberDao.add(me);
+        return new ResponseEntity<>(
+                networkMemberDao.list().toArray(),
+                HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/tracker/unregister", method = RequestMethod.POST)
+    public void memberUnregister(@RequestBody NetworkMember me) {
+        // and sync addition
+        networkMemberDao.remove(me);
+    }
 
     @Override
     @ResponseBody
@@ -31,8 +50,6 @@ public class TrackerController implements TrackerAPI {
             throw new RuntimeException("Ping member failed! Member: " + me);
         }
 
-        // and sync addition
-        networkMemberDao.add(me);
         return new ResponseEntity<>(
                 networkMemberDao.list().toArray(),
                 HttpStatus.OK);

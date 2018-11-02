@@ -16,7 +16,14 @@
 
 package com.all.write;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -27,16 +34,27 @@ import javax.servlet.ServletContextListener;
 @Component
 public class RegistrationServletContextListener implements ServletContextListener {
 
-	@Override
-	public void contextInitialized(ServletContextEvent sce) {
+    @Autowired
+    private NetworkMember me;
+
+    @Value("${tracker.address}")
+    private String trackerAddress;
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
         //add our blocks to the blockchain ArrayList:
 
-		System.out.println("*** contextInitialized");
-	}
+        System.out.println("*** contextInitialized");
+    }
 
-	@Override
-	public void contextDestroyed(ServletContextEvent sce) {
-		System.out.println("*** contextDestroyed");
-	}
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        RestTemplate rt = new RestTemplate();
+        rt.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        rt.getMessageConverters().add(new StringHttpMessageConverter());
+        String method = "/tracker/unregister";
+        String uri = "http://" + trackerAddress + ":8080" + method;
+        rt.exchange(uri, HttpMethod.POST, new HttpEntity<>(me), NetworkMember[].class);
+    }
 
 }

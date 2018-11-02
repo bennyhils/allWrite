@@ -43,7 +43,7 @@ public class RegistrationListener {
                 e.printStackTrace();
             }
             try {
-                Map<String, NetworkMember> networkMemberMap = clientService.getNetworkMembersFromTracker(trackerAddress);
+                Map<String, NetworkMember> networkMemberMap = clientService.getNetworkMembersFromTracker(trackerAddress, true);
                 dataHolder.setNetworkMembers(networkMemberMap);
 
                 if (networkMemberMap.size() == 1) {

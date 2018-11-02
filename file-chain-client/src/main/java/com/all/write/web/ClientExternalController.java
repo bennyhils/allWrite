@@ -189,7 +189,7 @@ public class ClientExternalController implements ChainExternal {
 
         try {
             if (!checkMember(authorKey, block)) {
-                dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress));
+                dataHolder.setNetworkMembers(clientService.getNetworkMembersFromTracker(trackerAddress, false));
 
                 if (!checkMember(authorKey, block)) {
                     LOGGER.warn("block author key verification failed {}.", block);

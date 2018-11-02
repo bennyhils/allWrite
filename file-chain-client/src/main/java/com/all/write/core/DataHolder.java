@@ -32,6 +32,9 @@ public class DataHolder {
     }
 
     public void setBlocks(List<Block> blocks) {
+        if (blocks.isEmpty()) {
+            throw new RuntimeException("empty block chain");
+        }
         this.blocks.clear();
         this.blocks.addAll(blocks);
     }
